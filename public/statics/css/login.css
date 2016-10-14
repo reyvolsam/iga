@@ -1,0 +1,28 @@
+body {
+	font-family: 'Open Sans', sans-serif !important;
+    background: #125580 url(../images/bg_login.jpg) no-repeat center top !important;
+	-webkit-background-size: cover !important;
+	-moz-background-size: cover !important;
+	background-size: cover !important;
+	text-align: center !important;
+}
+
+.login-box-body{
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	-ms-border-radius: 15px;
+	-o-border-radius: 15px;
+	border-radius: 15px;
+	position: absolute;
+	top: 35%;
+	left: 50%;
+	display: block;
+	margin-top: -185px;
+	margin-left: -205px;
+	width: 420px;
+	height: auto;
+	background: white;
+	text-align: center;
+	padding:30px;
+	color:#000;
+}
