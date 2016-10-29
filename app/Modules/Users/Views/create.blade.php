@@ -472,7 +472,7 @@
                 <div class = "col-md-4">
                   <label for = "group_id" class = "control-label">Puesto</label>
                   <i id = "select_loader_list" class = "fa fa-spinner fa-spin fa-1x"></i>
-                  <select name = "group_id" id = "group_id" class = "form-control" ng-model = "vm.user.group_id" ng-options="p_list.id as p_list.slug for p_list in vm.group_list" >
+                  <select name = "group_id" id = "group_id" class = "form-control" ng-model = "vm.user.group_id" ng-options="p_list.id as p_list.slug for p_list in vm.group_list">
                     <option value = "">Selecciona una Opción...</option>
                   </select>
 
