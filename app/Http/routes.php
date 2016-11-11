@@ -13,6 +13,7 @@ use App\Modules\Users\Controllers\UsersController;
 | and give it the controller to call when that URI is requested.
 |
 */
+
 Route::get('/', ['middleware' => 'loginIn', function (Request $request){
 
 	$uc = new UsersController($request);

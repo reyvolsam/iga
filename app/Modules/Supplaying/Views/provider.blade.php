@@ -32,7 +32,9 @@
   </div><!--/box-header-->
   <div class="box-body">
   <div id = "provider_list_msg"></div><!--/provider_msg-->
-	<table class = "table table-bordered table-striped">
+	<ul class = "pagination pull-right">
+	</ul>
+	<table class = "table table-bordered table-hover">
 		<thead>
 			<tr>
 				<th>No.</th>
@@ -45,7 +47,7 @@
 				<th>Acciones</th>
 			</tr>
 		</thead>
-		<tbody ng-repeat="elem in vm.provider_list">
+		<tbody ng-repeat="elem in vm.provider_list" ng-init="cont = $index;">
 			<tr>
 				<td>#@{{elem.id}}</td>
 				<td>@{{elem.name}}</td>
@@ -54,12 +56,16 @@
 				<td>@{{elem.street}} #@{{elem.number}} @{{elem.colony}}</td>
 				<td>@{{elem.credit_days}}</td>
 				<td>@{{elem.credit_limit}}</td>
-				<td>  </td>
+				<td> <button class = "btn btn-info btn-xs" ng-click = "vm.EditProvider(cont);"><i class = "fa fa-edit"></i></button> <button id = "del_@{{elem.id}}" class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProvider(cont);"><i class = "fa fa-trash"></i></button> </td>
 			</tr>
 		</tbody>
 	</table>
 	<i  id = "provider_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
   </div><!--/box-body-->
+  <div class = "box-footer">
+	<ul class = "pagination pull-right">
+	</ul>
+  </div><!--/box-footer-->
 </div><!--/box-->
 
 
@@ -544,14 +550,14 @@
 										<th>Tipo de Moneda</th>
 										<th>Acciones</th>
 									</thead>
-									<tbody ng-repeat = "elem in vm.provider.banks" ng-init = "cont = $index;">
+									<tbody ng-repeat = "elem in vm.provider.banks.list" ng-init = "cont = $index;">
 										<tr>
 											<td>@{{elem.name}}</td>
 											<td>@{{elem.no_count}}</td>
 											<td>@{{elem.inter_key}}</td>
 											<td>@{{elem.branch_office}}</td>
 											<td>@{{elem.type_coin}}</td>
-											<td> <button id = "del_bank_@{{cont}}" class = "btn btn-danger btn-xs" data-toggle="tooltip" data-placement="top" title="Eliminar Banco" ng-click = "vm.DeleteBank(cont);"><i class = "fa fa-trash"></i></button> </td>
+											<td> <button type = "button" id = "del_bank_@{{cont}}" class = "btn btn-danger btn-xs" data-toggle="tooltip" data-placement="top" title="Eliminar Banco" ng-click = "vm.DeleteBank(cont);"><i class = "fa fa-trash"></i></button> </td>
 										</tr>
 									</tbody>
 								</table>

@@ -28,12 +28,16 @@ class UsersController extends Controller {
 
 	public function GetUserRole()
 	{
-		$this->ru = DB::table('users_groups')
-						->select('groups.slug AS group_slug', 'groups.name AS group_name')
-						->where('user_id', '=', \Sentry::getUser()->id)
-						->join('groups', 'groups.id', '=', 'users_groups.group_id')
-						->first();
-		return $this->ru;
+		if( \Sentry::check() ){
+			$this->ru = DB::table('users_groups')
+							->select('groups.slug AS group_slug', 'groups.name AS group_name')
+							->where('user_id', '=', \Sentry::getUser()->id)
+							->join('groups', 'groups.id', '=', 'users_groups.group_id')
+							->first();
+			return $this->ru;
+		} else {
+			$this->res['msg'] = 'Inicie Sesión para seguir trabajando.';
+		}
 	}//get_user_role
 
 	public function UsersPost()

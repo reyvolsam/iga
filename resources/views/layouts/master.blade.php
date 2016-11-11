@@ -74,7 +74,7 @@
             <img src="{{ asset('statics/images/logo.png') }}" class="img-circle" alt="User Image">
           </div><!--image-->
           <div class="pull-left info">
-            <p>{{Sentry::getUser()->name}} {{Sentry::getUser()->first_name}} {{Sentry::getUser()->last_name}}</p>
+            <p>Plasticos del Golfo</p>
           </div><!--/info-->
         </div><!--user-panel-->
 
@@ -116,7 +116,7 @@
           </li>
           @endif
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
-          @if( $request->is('supplaying/provider') || $request->is('supplaying/provider/raw_material') || $request->is('supplaying/provider/finished_product') ) 
+          @if( $request->is('supplaying/provider') || $request->is('supplaying/provider/raw_material') || $request->is('supplaying/provider/finished_provider') ) 
           <li class = "active treeview"> @else <li class = "treeview"> @endif
             <a href="{{URL::to('supplaying/provider')}}"><i class = "fa fa-cubes"></i> Proveedores
               <span class="pull-right-container">
@@ -130,27 +130,30 @@
           </li>
           @endif
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
-          @if( $request->is('supplaying/product/material/type') )
+          @if( $request->is('supplaying/product/type/index') )
           <li class = "active treeview"> @else <li class = "treeview"> @endif
-            <a href="{{URL::to('supplaying/product/material/type')}}"><i class = "fa fa-leaf"></i>Tipo de Materia</a>
+            <a href="{{URL::to('supplaying/product/type/index')}}"><i class = "fa fa-list"></i>Tipo de Producto</a>
           </li>
           @endif
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
-          @if( $request->is('supplaying/product/material/type') )
-          <li class = "active treeview">@else<li class = "treeview">@endif
-          <a href="#"><i class = "fa fa-barcode"></i>Codigo Interno
+          @if( $request->is('supplaying/product/type/feature/class') || $request->is('supplaying/product/type/feature/model') || $request->is('supplaying/product/type/feature/adjust') || $request->is('supplaying/product/type/feature/color') || $request->is('supplaying/product/type/feature/feets') )
+          <li class = "active treeview"> @else <li class = "treeview"> @endif
+            <a href="#"><i class = "fa fa-list"></i>Caract. de Producto
               <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="{{URL::to('supplaying/product/internal_code/raw_material')}}">Materia Prima</a></li>
-            <li><a href="{{URL::to('supplaying/product/internal_code/finished_product')}}">Producto Terminado</a></li>
-          </ul>
+            </a>
+            <ul class="treeview-menu">
+              <li><a href="{{URL::to('supplaying/product/type/feature/class')}}">Clase</a></li>
+              <li><a href="{{URL::to('supplaying/product/type/feature/model')}}">Modelo</a></li>
+              <li><a href="{{URL::to('supplaying/product/type/feature/adjust')}}">Ajuste</a></li>
+              <li><a href="{{URL::to('supplaying/product/type/feature/color')}}">Color</a></li>
+              <li><a href="{{URL::to('supplaying/product/type/feature/feets')}}">Patitas</a></li>
+            </ul>
           </li>
           @endif
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
-          @if( $request->is('supplaying/product') || $request->is('supplaying/product/raw_material') || $request->is('supplaying/product/finished_provider') ) 
+          @if( $request->is('supplaying/product') || $request->is('supplaying/product/raw_material') || $request->is('supplaying/product/finished_product') || $request->is('supplaying/product/semifinished_product') ) 
           <li class = "active treeview"> @else <li class = "treeview"> @endif
             <a href="{{URL::to('supplaying/product')}}"><i class = "fa fa-list"></i> Productos
               <span class="pull-right-container">
@@ -159,6 +162,7 @@
             </a>
             <ul class="treeview-menu">
               <li><a href="{{URL::to('supplaying/product/raw_material')}}">Materia Prima</a></li>
+              <li><a href="{{URL::to('supplaying/product/semifinished_product')}}">Producto Semiterminado</a></li>
               <li><a href="{{URL::to('supplaying/product/finished_product')}}">Producto Terminado</a></li>
             </ul>
           </li>
