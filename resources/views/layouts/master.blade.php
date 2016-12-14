@@ -84,7 +84,7 @@
             <a href="{{URL::to('/')}}"><i class="fa fa-home"></i> <span>Principal</span></a>
           </li>
 
-          <li class="header">Modulos Principales</li>
+          <li class="header">Recursos Humanos</li>
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('human_resources') ) )
             @if ($request->is('users') || $request->is('users/create') || $request->is('users/requisition') || $request->is('users/requisition/list') || $request->is('users/requisition/view/list')) 
             <li class = "active treeview"> @else <li class = "treeview"> @endif
@@ -109,12 +109,14 @@
               </ul>
             </li>
           @endif
+          <li class="header">Finanzas</li>
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) )
           @if( $request->is('finances/bank') ) 
           <li class = "active"> @else <li> @endif
             <a href="{{URL::to('finances/bank')}}"><i class = "fa fa-dollar"></i> Bancos</a>
           </li>
           @endif
+          <li class="header">Almacen</li>
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
           @if( $request->is('supplaying/provider') || $request->is('supplaying/provider/raw_material') || $request->is('supplaying/provider/finished_provider') ) 
           <li class = "active treeview"> @else <li class = "treeview"> @endif
@@ -166,7 +168,15 @@
               <li><a href="{{URL::to('supplaying/product/finished_product')}}">Producto Terminado</a></li>
             </ul>
           </li>
-          @if ($request->is('supplaying/stock')) 
+
+          @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
+          @if( $request->is('supplaying/requisition') ) 
+          <li class = "active"> @else <li> @endif
+            <a href="{{URL::to('supplaying/requisition')}}"><i class = "fa fa-file-text"></i> Requisición</a>
+          </li>
+          @endif
+
+          @if ($request->is('supplaying/stock/raw_material/entry'))
             <li class = "active treeview"> @else <li class = "treeview"> @endif 
               <a href="{{URL::to('/')}}"><i class="fa fa-cube"></i> <span>Stock</span>
                 <span class="pull-right-container">
@@ -174,11 +184,36 @@
                 </span>
               </a>
                <ul class="treeview-menu">
-                <li><a href="{{URL::to('supplaying/raw_material')}}">Materia Prima</a></li>
+                <li>
+                  <a href="{{URL::to('supplaying/raw_material')}}"">Materia Prima
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                    <ul class="treeview-menu">
+                      <li><a href="{{URL::to('supplaying/stock/raw_material/entry')}}">Entrada</a></li>
+                      <li><a href="{{URL::to('supplaying/stock/raw_material/index')}}">Stock</a></li>
+                      <li><a href="{{URL::to('supplaying/stock/raw_material/departure')}}">Salidas</a></li>
+                    </ul>
+                  </a>
+                </li>
+                <li><a href="{{URL::to('supplaying/raw_material')}}">Producto Semiterminado</a></li>
+                <li><a href="{{URL::to('supplaying/raw_material')}}">Producto Terminado</a></li>
                </ul>
             </li>
           @endif
-          
+          @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
+          @if( $request->is('supplaying/order_production') ) 
+          <li class = "active"> @else <li> @endif
+            <a href="{{URL::to('supplaying/order_production')}}"><i class = "fa fa-list"></i> Orden de Producción</a>
+          </li>
+          @endif
+          <li class="header">Ventas</li>
+          @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('selling') ) )
+          @if( $request->is('selling/clients') ) 
+          <li class = "active"> @else <li> @endif
+            <a href="{{ URL::to('selling/clients') }}"><i class="fa fa-address-book" aria-hidden="true"></i> Clientes</a>
+          </li>
+          @endif
           <li class="header">Modulos de Validación</li>
           @if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('management') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ))
             @if ($request->is('users/requisition/validate/view/list')) 
@@ -186,6 +221,7 @@
               <a href="{{URL::to('users/requisition/validate/view/list')}}"><i class="fa fa-file-text-o" aria-hidden="true"></i> <span>Validar Requisición</span></a>
             </li>
           @endif
+
         </ul><!--/sidebar-menu-->
       </section>
     </aside>

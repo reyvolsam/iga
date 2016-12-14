@@ -56,15 +56,14 @@
 				<td>@{{elem.street}} #@{{elem.number}} @{{elem.colony}}</td>
 				<td>@{{elem.credit_days}}</td>
 				<td>@{{elem.credit_limit}}</td>
-				<td> <button class = "btn btn-info btn-xs" ng-click = "vm.EditProvider(cont);"><i class = "fa fa-edit"></i></button> <button id = "del_@{{elem.id}}" class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProvider(cont);"><i class = "fa fa-trash"></i></button> </td>
+				<td> <button class = "btn btn-info btn-xs" ng-click = "vm.EditProvider(cont);"><i class = "fa fa-edit"></i></button> <button id = "del_@{{elem.id}}" class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProvider($index);"><i class = "fa fa-trash"></i></button> </td>
 			</tr>
 		</tbody>
 	</table>
 	<i  id = "provider_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
   </div><!--/box-body-->
   <div class = "box-footer">
-	<ul class = "pagination pull-right">
-	</ul>
+	<ul class = "pagination pull-right"></ul>
   </div><!--/box-footer-->
 </div><!--/box-->
 

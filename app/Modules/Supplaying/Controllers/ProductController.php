@@ -53,6 +53,7 @@ class ProductController extends Controller {
 						$data['unit'] 			= $this->request->input('unit');
 						$data['description'] 	= $this->request->input('description');
 						$data['updated_at'] 	= date('Y-m-d');
+						$data['total'] 			= 0;
 
 						$validator = Validator::make($data, [
 				        			'code' 			=> 'required',

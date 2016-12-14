@@ -20,12 +20,37 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 	Route::post('supplaying/product/type/feature/save', 'ProductController@ProductTypeFeatureSave');
 	Route::post('supplaying/product/type/feature/list', 'ProductController@ProductTypeFeatureList');
 	
+	Route::get('supplaying/stock/raw_material/entry', 'StockController@StockRawMaterialIndex');
+	Route::post('supplaying/stock/raw_material/entry/load', 'StockController@StockRawMaterialLoad');
+	Route::post('supplaying/stock/raw_material/entry/save', 'StockController@StockRawMaterialSave');
+	Route::post('supplaying/stock/raw_material/entry/list', 'StockController@StockRawMaterialList');
+
+	Route::get('supplaying/stock/raw_material/index', 'StockController@StockRawMaterialView');
+	Route::post('supplaying/stock/raw_material/list', 'StockController@StockRawMaterialListStock');
+	
+	
+	Route::get('supplaying/order_production', 'SupplayingController@OrderProductionView');
+	Route::post('supplaying/order_production/save', 'SupplayingController@OrderProductionSave');
+	Route::post('supplaying/order_production/list', 'SupplayingController@OrderProductionList');
+	Route::post('supplaying/order_production/data', 'SupplayingController@OrderProductionData');
+	Route::post('supplaying/order_production/validate', 'SupplayingController@OrderProductionValidate');
+
+	Route::get('supplaying/requisition', 'SupplayingController@RequisitionIndex');
+	Route::post('supplaying/requisition/get_date', 'SupplayingController@RequisitionDate');
+	Route::post('supplaying/requisition/product', 'SupplayingController@RequisitionProductList');
+	Route::post('supplaying/requisition/save', 'SupplayingController@RequisitionSave');
+	Route::post('supplaying/requisition/list', 'SupplayingController@RequisitionList');
+	Route::post('supplaying/requisition/delete', 'SupplayingController@RequisitionDelete');
+
 	/*Route::get('supplaying/product/material/type', 'ProductController@ProductMaterialTypeIndex');
 	Route::post('supplaying/product/material/type/save', 'ProductController@ProductMaterialTypeSave');
 	Route::post('supplaying/product/material/type/list', 'ProductController@ProductMaterialTypeList');*/
 
-
     Route::resource('supplaying', 'SupplayingController');
+
+
+
+
 
     Route::get('supplaying/stock/raw_material', 'StockController@RawMaterialIndex');
     

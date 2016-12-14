@@ -189,7 +189,7 @@
 					<div class="form-group">
 						<label for = "unidad" class="control-label">Unidad</label>
 							<select id = "unidad" name = "unidad" class = "form-control" ng-model = "vm.product.unit">
-								<option value = " ">Seleccione una Opción</option>
+								<option value = "">Seleccione una Opción</option>
 								<option value = "Pieza">Pieza</option>
 								<option value = "Cm.">Cm.</option>
 								<option value = "Mtrs.">Mtrs.</option>
