@@ -12,6 +12,7 @@
 @section('js')
   	{!! HTML::script('statics/js/lib/jquery.inputmask.js') !!}
   	{!! HTML::script('statics/js/lib/jquery.inputmask.date.extensions.js') !!}
+  	{!! HTML::script('statics/js/lib/angular-file-upload.min.js') !!}
   	{!! HTML::script('statics/js/customs/requisition.js') !!}
 @stop
 
@@ -25,31 +26,68 @@
 			<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
 		</div><!--/box-tools-->
 	</div><!--/box-header-->
-	<div class="box-body" ng-init = "vm.OrderProductionList();">
+	<div class="box-body" ng-init = "vm.RequisitionList();">		
   		<div id = "requisition_list_msg"></div><!--/order_produciton_msg-->
+  		<div class = "col-md-12">
+  			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) )
+  			<div class = "col-md-4">
+  				<label>Filtrar por Departamento</label><br />
+  					<select class = "form-control pull-left" id = "filter_user" name = "filter_user" ng-model = "vm.filter_user" ng-change = "vm.ChangeFilterUser();"> 
+  						<option value = "all" selected>Todos</option>
+  						<option value = "1">Administrador</option>
+  						<option value = "4">Finanzas</option>
+  						<option value = "5">Compras</option>
+						<option value = "6">Ventas</option>
+  						<option value = "7">Calidad</option>
 
+  					</select>
+  			</div><!--/col-md-4-->
+  			@endif
+  			<ul class = "pagination pull-right"></ul><!--/pagination-->	
+  		</div><!--/col-md-12-->
+		
   		<table class = "table">
   			<thead>
   				<th>Folio</th>
+  				<th>Departamento</th>
   				<th>Fecha Solicitada</th>
   				<th>Fecha Requerida</th>
   				<th>Total Requisitado</th>
   				<th>Uso</th>
   				<th>Acciones</th>
   			</thead>
-  			<tbody ng-repeat = "elem in vm.requirement_list">
+  			<tbody ng-repeat = "elem in vm.requisition_list" ng-init = "cont = $index">
   				<tr>
   					<td>#@{{ elem.id }}</td>
+  					<td>@{{ elem.group_name }}</td>
   					<td>@{{ elem.requested_date }}</td>
   					<td>@{{ elem.required_date }}</td>
   					<td>@{{ elem.total | currency }}</td>
   					<td>@{{ elem.use }}</td>
-  					<td> <button type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequirement($index);" data-toggle="tooltip" data-placement="top" title="Editar Requisición"><i class = "fa fa-edit"></i></button> <button type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequirement($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button> </td>
+  					<td>
+  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Ver Requisición"><i class = "fa fa-eye"></i></button> 
+  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Editar Requisición"><i class = "fa fa-edit"></i></button> 
+  						
+  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequisition($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button>
+  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-danger btn-xs" disabled="disabled"><i class = "fa fa-trash"></i></button>
+  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
+  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Convertir a Orden de Compra"><i class = "fa fa-check"></i></button> 
+  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> 
+  						@endif
+  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
+  						<!--<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> -->
+  						<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 0" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ValidatePayRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Validar Pago de Requisición"><i class = "fa fa-check"></i></button> 
+  						<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 1" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ViewPayTicket($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Boucher de Pago"><i class = "fa fa-money"></i></button> 
+  						@endif
+  					</td>
   				</tr>
   			</tbody>
   		</table>
   		<i  id = "requisition_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	</div><!--/box-body-->
+	<div class = "box-footer">
+		<ul class = "pagination pull-right"></ul><!--/pagination-->
+	</div><!--/box-footer-->
 </div><!--/box-->
 
 
@@ -64,7 +102,7 @@
 					<div class = "row">
 						<div class="col-md-4" ng-init = "vm.GetDate();">
 							<label for = "requested_date" class = "control-label">Fecha Solicitada</label>
-							<input type = "text" class = "form-control" name = "requested_date" id = "requested_date" ng-model = "vm.requirement.requested_date" readonly/>
+							<input type = "text" class = "form-control" name = "requested_date" id = "requested_date" ng-model = "vm.requisition.requested_date" readonly/>
 						</div><!--/col-md-4-->
 						<div class="col-md-4">
 							<label for = "required_date" class = "control-label">Fecha Requerida</label>
@@ -72,12 +110,12 @@
 								<div class="input-group-addon">
                   					<i class="fa fa-calendar"></i>
                 				</div><!--/input-group-addon-->
-                				<input type = "text" class="form-control" name = "required_date" id = "required_date" ng-model = "vm.requirement.required_date" required data-inputmask="'alias': 'yyyy-mm-dd'" data-mask/>
+                				<input type = "text" class="form-control" name = "required_date" id = "required_date" ng-model = "vm.requisition.required_date" required data-inputmask="'alias': 'yyyy-mm-dd'" data-mask/>
 							</div><!--/input-group-->
 						</div><!--/col-md-4-->	
-						<div class="col-md-4">
+						<div class="col-md-4" id = "product_type_div">
 							<label for = "product_type" class = "control-label">Producto</label>
-							<select id = "product_type" name = "product_type" ng-model = "vm.requirement.product_type" ng-change = "vm.ChangeProductType();" class = "form-control">
+							<select id = "product_type" name = "product_type" ng-model = "vm.requisition.product_type" ng-change = "vm.ChangeProductType();" class = "form-control">
 								<option value = "">Selecciona una Opción</option>
 								<option value = "catalog">Producto de Catalago</option>
 								<option value = "no_catalog">Producto sin Registro</option>
@@ -92,7 +130,7 @@
 					 	<div class="panel-body">
 							<div class="col-md-4">
 								<label for = "filter_product" class = "control-label">Tipo de Producto</label>
-								<select id = "filter_product" name = "filter_product" ng-model = "vm.requirement.filter_product" ng-change = "vm.ChangeFilterProduct();" class = "form-control">
+								<select id = "filter_product" name = "filter_product" ng-model = "vm.requisition.filter_product" ng-change = "vm.ChangeFilterProduct();" class = "form-control">
 									<option value = "">Selecciona una Opción</option>
 									<option value = "raw_material">Materia prima</option>
 									<option value = "finished_product">Productos Terminados</option>
@@ -163,128 +201,310 @@
 						</div><!-- termina panel-body -->
 					</div><!-- termina panel -->
 
-					<div class="panel panel-default">
+					<div class="panel panel-default" id = "finances_info">
 						<div class="panel-heading">Información Financiera</div>
-						 	<div class="panel-body">
-						 		<div class="col-md-4">
-									<label for = "money_type" class = "control-label">Tipo de moneda</label>
-									<select class = "form-control" id = "money_type" name = "money_type" ng-model = "vm.finances.money_type" ng-change = "vm.ChangeMoneyType();">
-										<option value = "">Selecciona una Opción...</option>
-										<option value = "USD">USD</option>
-										<option value = "MX">MX</option>
-									</select>
-								</div><!--/col-md-4-->
-								<div class="col-md-4" id = "dollar_value_id">
-									<label for = "dollar_value" class = "control-label">Tipo de Cambio</label>
-									<div class="input-group">
-										<div class="dolar_sign input-group-addon">$</div>
-										<input type = "text" class = "form-control" id = "dollar_value" name = "dollar_value" ng-model = "vm.finances.dollar_value" ng-change = "vm.ChangeDollarValue();" placeholder = "Tipo de Cambio" />
-									</div>
+					 	<div class="panel-body">
+					 		<div class="col-md-4">
+								<label for = "money_type" class = "control-label">Tipo de moneda</label>
+								<select class = "form-control" id = "money_type" name = "money_type" ng-model = "vm.finances.money_type" ng-change = "vm.ChangeMoneyType();">
+									<option value = "">Selecciona una Opción...</option>
+									<option value = "USD">USD</option>
+									<option value = "MX">MX</option>
+								</select>
+							</div><!--/col-md-4-->
+							<div class="col-md-4" id = "dollar_value_id">
+								<label for = "dollar_value" class = "control-label">Tipo de Cambio</label>
+								<div class="input-group">
+									<div class="dolar_sign input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "dollar_value" name = "dollar_value" ng-model = "vm.finances.dollar_value" ng-change = "vm.ChangeDollarValue();" placeholder = "Tipo de Cambio" />
 								</div>
-								<div class="col-md-4" id = "dollar_price_div">
-									<label for = "dollar_price" class = "control-label">Precio Unitario en Dolares</label>
-									<div class="input-group">
-										<div class="dolar_sign input-group-addon">$</div>
-										<input type = "text" class = "form-control" id = "dollar_price" name = "dollar_price" ng-change = "vm.ChangeDollarPrice();" ng-model = "vm.finances.dollar_price" placeholder = "Precio Unitario en Dolar" />
-									</div>
-								</div>	
-								<div class="col-md-4" id = "pesos_price_div">
-									<label for = "pesos_price" class = "control-label">Precio Unitario en Pesos</label>
-									<div class="input-group">
-										<div class="input-group-addon">$</div>
-										<input type = "text" class = "form-control" id = "pesos_price" name = "pesos_price" ng-model = "vm.finances.pesos_price" ng-change = "vm.ChangePesosPrice();" placeholder = "Precio en Pesos" />
-									</div>
-								</div>					
-								<div class="col-md-4" id = "importe_div">
-									<label for = "importe" class = "control-label">Importe (MX) </label>
-									<div class="input-group">
-										<div class="input-group-addon">$</div>
-										<input type = "text" class = "form-control" id = "importe" name = "importe" ng-model = "vm.finances.importe" placeholder = "Importe" readonly />
-									</div>
+							</div>
+							<div class="col-md-4" id = "dollar_price_div">
+								<label for = "dollar_price" class = "control-label">Precio Unitario en Dolares</label>
+								<div class="input-group">
+									<div class="dolar_sign input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "dollar_price" name = "dollar_price" ng-change = "vm.ChangeDollarPrice();" ng-model = "vm.finances.dollar_price" placeholder = "Precio Unitario en Dolar" />
 								</div>
-									
-							</div><!-- termina panel-body -->
-						</div><!-- termina panel -->
-						<div class="col-md-4">
-							<button type = "button" id = "add_product_item_btn" class = "form-control btn btn-default" ng-click = "vm.AddProductItem();"><i class="fa fa-plus"></i> Agregar Partida </button>
-						</div><!--/col-md-4-->
-						<br />
-						<table class = "table">
-							<thead>
-								<th>Part.</th>
-								<th>Descripción</th>
-								<th>Unidad</th>
-								<th>Uso Req.</th>
-								<th>Pzas. Req</th>
-								<th>Moneda</th>
-								<th>Precio Unitario(MX)</th>
-								<th>Importe(MX)</th>
-							</thead>
-							<tbody ng-repeat = "elem in vm.products_list" ng-init = "cont = $index">
-								<tr>
-									<td>@{{ cont+1 }}</td>
-									<td>@{{ elem.product_description }}</td>
-									<td>@{{ elem.product_unit }}</td>
-									<td>@{{ elem.product_use }}</td>
-									<td>@{{ elem.product_pieces }}</td>
-									<td>@{{ elem.money_type }}</td>
-									<td>@{{ elem.pesos_price | currency }}</td>
-									<td>@{{ elem.importe | currency }}</td>
-								</tr>
-							</tbody>
-						</table>
-						<br />
-						<div class="col-md-4">
-							<label for = "sub_total" class = "control-label">Sub-Total</label>
-							<div class="input-group">
-								<div class="input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "sub_total" name = "sub_total" ng-model = "vm.requirement.subtotal" placeholder = "Sub-Total" readonly />
-								</div><!--/input-group-addon-->
-						</div><!--/col-md-4-->
-						<div class="col-md-4">
-							<label for = "iva" class = "control-label">IVA</label>
-							<div class="input-group">
-								<input type = "text" class = "form-control" id = "iva" name = "iva" ng-model = "vm.requirement.iva" ng-change = "vm.ChangeIVA();" placeholder = "IVA" />
-								<div class="input-group-addon">%</div>
-							</div><!--/input-group-->
-						</div><!--/col-md-4-->
-						<div class="col-md-4">
-							<label for = "total" class = "control-label">Total</label>
-							<div class="input-group">
-								<div class="input-group-addon">$</div>
-								<input type = "text" class = "form-control" id = "total" name = "total" ng-model = "vm.requirement.total" placeholder = "Total" readonly />
-							</div><!--/input-group-->
-						</div><!--/col-md-4-->
-						<br />
-						<br />
-						<br />
-						<br />
-						<br />
-						<br />
-						<div class = "row">
-							<div class="form-group">
-								<label for = "use" class = "col-lg-3 control-label">Uso de lo Requerido</label>
-								<div class="col-lg-9">
-									<input type = "text" class = "form-control" name = "use" id = "use" ng-model = "vm.requirement.use" placeholder = "Uso de lo Requerido" required/>
-								</div><!--/form-group-->
-								<br />
-								<br />
-								<br />
-								<label for = "observations" class="col-lg-2 control-label">Observaciones</label>
-								<div class="col-lg-10">
-									<textarea class="form-control" rows="4" id = "observations" name = "observations" ng-model = "vm.requirement.observations" required></textarea>
-								</div><!--/col-lg-10-->
+							</div>	
+							<div class="col-md-4" id = "pesos_price_div">
+								<label for = "pesos_price" class = "control-label">Precio Unitario en Pesos</label>
+								<div class="input-group">
+									<div class="input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "pesos_price" name = "pesos_price" ng-model = "vm.finances.pesos_price" ng-change = "vm.ChangePesosPrice();" placeholder = "Precio en Pesos" />
+								</div>
+							</div>					
+							<div class="col-md-4" id = "importe_div">
+								<label for = "importe" class = "control-label">Importe (MX) </label>
+								<div class="input-group">
+									<div class="input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "importe" name = "importe" ng-model = "vm.finances.importe" placeholder = "Importe" readonly />
+								</div>
+							</div>
+						</div><!-- termina panel-body -->
+					</div><!-- termina panel -->
+					<div class="col-md-4">
+						<button type = "button" id = "add_product_item_btn" class = "form-control btn btn-default" ng-click = "vm.AddProductItem();"><i class="fa fa-plus"></i> Agregar Partida </button>
+					</div><!--/col-md-4-->
+					<br />
+					<table class = "table">
+						<thead>
+							<th>Part.</th>
+							<th>Descripción</th>
+							<th>Unidad</th>
+							<th>Uso Req.</th>
+							<th>Pzas. Req</th>
+							<th>Moneda</th>
+							<th>Precio Unitario(MX)</th>
+							<th>Importe(MX)</th>
+							<th>Acción</th>
+						</thead>
+						<tbody ng-repeat = "elem in vm.products_list" ng-init = "cont = $index">
+							<tr>
+								<td>#@{{ cont+1 }}</td>
+								<td>@{{ elem.product_description }}</td>
+								<td>@{{ elem.product_unit }}</td>
+								<td>@{{ elem.product_use }}</td>
+								<td>@{{ elem.product_pieces }}</td>
+								<td>@{{ elem.money_type }}</td>
+								<td>@{{ elem.pesos_price | currency }}</td>
+								<td>@{{ elem.importe | currency }}</td>
+								<td><button type = "button" class = "btn_edit_pieces btn btn-default btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button></td>
+							</tr>
+						</tbody>
+					</table>
+					<br />
+					<div class="col-md-4">
+						<label for = "sub_total" class = "control-label">Sub-Total</label>
+						<div class="input-group">
+							<div class="input-group-addon">$</div>
+								<input type = "text" class = "form-control" id = "sub_total" name = "sub_total" ng-model = "vm.requisition.subtotal" placeholder = "Sub-Total" readonly />
+							</div><!--/input-group-addon-->
+					</div><!--/col-md-4-->
+					<div class="col-md-4">
+						<label for = "iva" class = "control-label">IVA</label>
+						<div class="input-group">
+							<input type = "text" class = "form-control" id = "iva" name = "iva" ng-model = "vm.requisition.iva" ng-change = "vm.ChangeIVA();" placeholder = "IVA" />
+							<div class="input-group-addon">%</div>
+						</div><!--/input-group-->
+					</div><!--/col-md-4-->
+					<div class="col-md-4">
+						<label for = "total" class = "control-label">Total</label>
+						<div class="input-group">
+							<div class="input-group-addon">$</div>
+							<input type = "text" class = "form-control" id = "total" name = "total" ng-model = "vm.requisition.total" placeholder = "Total" readonly />
+						</div><!--/input-group-->
+					</div><!--/col-md-4-->
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<div class = "row">
+						<div class="form-group">
+							<label for = "use" class = "col-lg-3 control-label">Uso de lo Requerido</label>
+							<div class="col-lg-9">
+								<input type = "text" class = "form-control" name = "use" id = "use" ng-model = "vm.requisition.use" placeholder = "Uso de lo Requerido" required/>
 							</div><!--/form-group-->
-						</div><!-- termina row -->
+							<br />
+							<br />
+							<br />
+						</div><!--/form-group-->
+						<div class = "form-group">
+							<label for = "observations" class="col-lg-2 control-label">Observaciones</label>
+							<div class="col-lg-10">
+								<textarea class="form-control" rows="4" id = "observations" name = "observations" ng-model = "vm.requisition.observations" required></textarea>
+							</div><!--/col-lg-10-->
+						</div><!--/form-group-->
+					</div><!-- termina row -->
 
 				</div><!--/modal-body-->
 				<div id = "save_requisition_msg"></div><!-- requisition_list_msg-->
 				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" id = "cancel_requirement_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type="button" class="btn btn-danger" id = "cancel_requistion_btn" data-dismiss="modal" aria-hidden="true" ng-click = "vm.CancelRequisition();">Cancelar</button>
 					<button type = "submit" class = "btn btn-success" id = "submit_requisition_btn">Guardar Requisición</button>
+				</div>
+			</form>
+		</div><!--/modal-content-->		
+	</div><!--/modal-dialog-->
+</div><!--/modal-->
+
+<div class="modal fade" id = "convert_requisition_modal" tabindex = "-1" role="dialog" aria-labelledby="convert_requisition_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Convertir a Orden Compra</h4>
+			</div>
+			<form method = "post" ng-submit = "vm.SubmitConvertRequisition();">
+				<div class="modal-body">
+					<div class = "row">
+						<div class="col-md-4">
+							<label for = "order_buy_date" class = "control-label">Fecha</label>
+							<div class = "input-group">
+								<div class="input-group-addon">
+                  					<i class="fa fa-calendar"></i>
+                				</div><!--/input-group-addon-->
+                				<input type = "text" class="form-control" name = "order_buy_date" id = "order_buy_date" ng-model = "vm.order_buy.date" required data-inputmask="'alias': 'yyyy-mm-dd'" data-mask/>
+							</div><!--/input-group-->
+						</div><!--/col-md-4-->	
+						<div class="col-md-4">
+							<label for = "order_buy_pay_conditions" class = "control-label">Condiciones de Pago</label>
+							<input type = "text" class = "form-control" id = "order_buy_pay_conditions" name = "order_buy_pay_conditions" ng-model = "vm.order_buy.pay_conditions" placeholder = "Condiciones de Pago" />
+						</div><!--/col-md-4-->
+					</div><!-- termina row -->
+
+					<div class="col-md-6">
+						<label for = "order_buy_provider_id" class = "control-label">Proveedor</label>
+						<i id = "select_providers" class = "fa fa-spinner fa-spin fa-1x"></i>
+						<select id = "order_buy_provider_id" name = "order_buy_provider_id" ng-model = "vm.order_buy.provider_id" class = "form-control" ng-options = "p_list.id as p_list.name for p_list in vm.providers_list_select">
+							<option value = "">Seleccione una Opción...</option>
+						</select>
+					</div><!--/col-md-4-->
+
+					<br />
+					<br />
+
+					<table class = "table">
+						<thead>
+							<th>Part.</th>
+							<th>Descripción</th>
+							<th>Unidad</th>
+							<th>Uso Req.</th>
+							<th>Pzas. Req</th>
+							<th>Moneda</th>
+							<th>Precio Unitario(MX)</th>
+							<th>Importe(MX)</th>
+						</thead>
+						<tbody ng-repeat = "elem in vm.order_buy_list" ng-init = "cont = $index">
+							<tr>
+								<td>#@{{ cont+1 }}</td>
+								<td>@{{ elem.product_description }}</td>
+								<td>@{{ elem.product_unit }}</td>
+								<td>@{{ elem.product_use }}</td>
+								<td>@{{ elem.product_pieces }}</td>
+								<td>@{{ elem.money_type }}</td>
+								<td>@{{ elem.pesos_price | currency }}</td>
+								<td>@{{ elem.importe | currency }}</td>
+							</tr>
+						</tbody>
+					</table>
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<div class = "row">
+						<div class="form-group">
+							<label for = "order_buy_deliver_place" class = "col-lg-3 control-label">Entregar en:</label>
+							<div class="col-lg-9">
+								<select class = "form-control" name = "order_buy_deliver_place" id = "order_buy_deliver_place" ng-model = "vm.order_buy.deliver_place" ng-change = "vm.ChangeDeliverPlace();">
+									<option value = "">Seleccione una Opción...</option>
+									<option value = "PLASTICOS DEL GOLFO SUR">PLASTICOS DEL GOLFO SUR</option>
+									<option value = "other">Nueva Opción de Entega...</option>
+								</select>
+							</div><!--/form-group-->
+						</div><!--/form-group-->
+						<br />
+						<br />
+						<div class = "form-group" id = "new_place_div">
+							<label for = "order_buy_new_place" class="col-lg-2 control-label">Nuevo Lugar:</label>
+							<div class="col-lg-10">
+								<input type = "text" class="form-control"  id = "order_buy_new_place" name = "order_buy_new_place" ng-model = "vm.order_buy.new_place" />
+							</div><!--/col-lg-10-->
+						</div><!--/form-group-->
+						<br />
+						<br />
+						<div class = "form-group">
+							<label for = "order_buy_observations" class="col-lg-2 control-label">Observaciones</label>
+							<div class="col-lg-10">
+								<textarea class="form-control" rows="4" id = "order_buy_observations" name = "order_buy_observations" ng-model = "vm.order_buy.order_observations" required></textarea>
+							</div><!--/col-lg-10-->
+						</div><!--/form-group-->
+					</div><!-- termina row -->
+
+				</div><!--/modal-body-->
+				<div id = "save_order_buy_msg"></div><!-- requisition_list_msg-->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" ng-click = "vm.CancelOrderBuy();" id = "cancel_order_buy_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type = "submit" class = "btn btn-success" id = "submit_order_buy_btn">Convertir a Orden de Compra</button>
 				</div>
 			</form>
 		</div><!--/modal-content-->
 	</div><!--/modal-dialog-->
 </div><!--/modal-->
+
+@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
+<div class="modal fade" id = "validate_pay_modal" tabindex = "-1" role="dialog" aria-labelledby="validate_pay_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Validar Pago</h4>
+			</div>
+			<form method = "post" ng-submit = "vm.SubmitValidatePayRequsition();">
+				<div class="modal-body">
+
+					<div class="col-lg-6">
+						<div class="file-field input-field">
+							<div class="form-group">
+								<label for = "ticket_file" class="control-label">Baucher de Pago</label>
+								<div id = "wrapper"> 
+									<input  nv-file-select = "" uploader="uploader" class = "form-control" type = "file" id = "ticket_file" name = "ticket_file" size="1" multiple/> 
+								</div><!--/wrapper-->
+							</div><!--/form-group-->
+						</div><!--/file-field-->
+					</div><!--/col-lg-6-->
+
+					<table class = "table table-bordered table-striped">
+						<thead>
+							<th>Nombre del Archivo</th>
+							<th>Tamaño</th>
+							<th>Acción</th>
+						</thead>
+						<tbody ng-repeat="item in uploader.queue">
+							<tr>
+								<td><strong>@{{ item.file.name }}</strong></td>
+								<td> @{{ item.file.size/1024/1024|number:2 }} MB </td>
+								<td><button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()"><span class="glyphicon glyphicon-trash"></span></button></td>
+							</tr>
+						</tbody>
+					</table>
+
+                  	<div class="progress xs">
+                    	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
+                  	</div><!---/progress-->
+
+				</div><!--/modal-body-->
+				<div id = "save_validate_pay_msg"></div><!-- requisition_list_msg-->
+				<div class = "clearfix"></div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" ng-click = "vm.CancelValidatePay();" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type = "submit" class = "btn btn-success" id = "submit_validate_pay_btn">Validar Pago de Requisición</button>
+				</div>
+			</form>
+		</div><!--/modal-content-->
+	</div><!--/modal-dialog-->
+</div><!--/modal-->
+@endif
+
+@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
+<div class="modal fade" id = "view_pay_modal" tabindex = "-1" role="dialog" aria-labelledby="view_pay_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Ver Boucher de Pago</h4>
+			</div>
+			<div class="modal-body">
+			<img src = "#" id = "view_pay" name = "view_pay" width="400" height="250" />
+			</div><!--/modal-body-->
+			<div id = "view_pay_msg"></div><!-- requisition_list_msg-->
+			<div class = "clearfix"></div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+			</div>
+		</div><!--/modal-content-->
+	</div><!--/modal-dialog-->
+</div><!--/modal-->
+@endif
+
 @stop

@@ -41,8 +41,7 @@
   </div><!--/box-header-->
   <div class="box-body" ng-init = "vm.GetProductList();">
   <div id = "product_msg"></div><!--/product_msg-->
-	<ul class = "pagination pull-right">
-	</ul>
+	<ul class = "pagination pull-right"></ul><!--/pagination-->
   	@if($product_type == 'raw_material')
 	<table class = "table table-bordered table-hover">
 		<thead>
@@ -125,11 +124,10 @@
 		</tbody>
 	</table>
 	@endif
-  </div><!--/box-body-->
-  <div class = "box-footer">
-	<ul class = "pagination pull-right">
-	</ul>
-  </div><!--/box-footer-->
+	</div><!--/box-body-->
+	<div class = "box-footer">
+		<ul class = "pagination pull-right"></ul><!--/pagination-->
+	</div><!--/box-footer-->
 </div><!--/box-->
 
 @if($product_type == 'raw_material')

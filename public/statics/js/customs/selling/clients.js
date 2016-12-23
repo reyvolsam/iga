@@ -4,6 +4,7 @@ function clients_init($http){
     var vm = this;
 
     vm.page = 1;
+    vm.pc = null;
     vm.users_list = {};
     vm.banks_list_select = {};
     vm.send_list_select = {};
@@ -327,5 +328,40 @@ function clients_init($http){
     {
         var_init();
     }//vm.CancelClient()
+
+    vm.CheckPC = function ()
+    {
+        vm.pc_list = {};
+        $('#btn_check_pc').html('<i class="fa fa-spinner fa-spin fa-1x"></i>');
+        $('#btn_check_pc').attr('disabled', 'disabled');
+        $http.post('clients/pc', { pc: vm.pc })
+            .success(function(res){
+                console.log(res);
+                $('#btn_check_pc').html('Comprobar Codigo Postal');
+                $('#btn_check_pc').removeAttr('disabled');
+                if(res.status){
+                    vm.pc_list = res.data;
+                    for(i in vm.pc_list){
+                        vm.pc_list[i].Colonia = vm.pc_list[i].Colonia.split(';');
+                        //console.log(aux);
+                    }
+                    $('#pc_msg').html('');
+                } else {
+                    $('#pc_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+            console.log(res);
+            $('#btn_check_pc').html('Comprobar Codigo Postal');
+            $('#btn_check_pc').removeAttr('disabled');
+        });
+    }//vm.CheckPC
+
+    vm.GetPC = function (ind1, ind2)
+    {
+        vm.send.state = vm.pc_list[ind1].Estado;
+        vm.send.city = vm.pc_list[ind1].Municipio;
+        vm.send.colony = vm.pc_list[ind1].Colonia[ind2];
+        vm.send.cp = vm.pc_list[ind1].CodigoPostal;
+    }//vm.GetPC
 
 }//clients_init

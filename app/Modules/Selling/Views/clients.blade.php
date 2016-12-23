@@ -539,8 +539,51 @@
 						<div class="panel-body">
 							<div class="form-group">
 								<div class="col-md-12">
-									<label>&nbsp;</label><br>
-									<button type ="button" ng-click = "vm.CopyFromFiscal();" class="btn btn-default"><i class="fa fa-copy"></i>&nbsp;  Copiar Direccion Fiscal</button>
+									<div class = "col-md-3">
+									<label>&nbsp;</label><br />
+										<button type ="button" ng-click = "vm.CopyFromFiscal();" class="btn btn-default"><i class="fa fa-copy"></i>&nbsp;  Copiar Direccion Fiscal</button>
+									</div><!--/col-md-3-->
+									<form>
+										<div class = "col-md-3">
+											<label for = "cp_check">Codigo Postal</label>
+											<input type = "text" class = "form-control" name = "cp_check" id = "cp_check" ng-model = "vm.pc" placeholder = "Codigo Postal" />
+										</div><!--/col-md-3-->
+										<div class = "col-md-3">
+											<label>&nbsp;</label><br />
+											<button type = "submit" id = "btn_check_pc" ng-click = "vm.CheckPC();" class="btn btn-default">Comprobar Codigo Postal</button>
+										</div><!--/col-md-3-->
+									</form>
+								</div><!--/col-md-12-->
+								<br />
+								<br />
+								<br />
+								<br />
+								<div class = "col-md-12">
+									<div id = "pc_msg"></div><!--/pc_msg-->
+									<table class = "table">
+										<thead>
+											<th>Codigo Postal</th>
+											<th>Estado</th>
+											<th>Municipio</th>
+											<th>Colonia</th>
+										</thead>
+										<tbody ng-repeat = "elem in vm.pc_list" ng-init = "cont1 = $index">
+											<tr>
+												<td>@{{ elem.CodigoPostal }}</td>
+												<td>@{{ elem.Estado }}</td>
+												<td>@{{ elem.Municipio }}</td>
+												<td> 
+													<ul class="list-group">
+														<li class="list-group-item" ng-repeat = "e in elem.Colonia" ng-init = "cont2 = $index">
+															@{{e}}
+															<button type = "button" class = "btn btn-default btn-xs" ng-click = "vm.GetPC(cont1, cont2);" data-toggle="tooltip" data-placement="top" title="Utilizar Codigo Postal"><i class = "fa fa-check"></i></button>
+    	            									</li>
+                									</ul>
+												</td>
+												<td></td>
+											</tr>
+										</tbody>
+									</table>
 								</div><!--/col-md-12-->
 								<div class="col-md-3">
 									<label for="country_send" class="control-label">País</label>
@@ -898,5 +941,6 @@
 			</form>
 		</div><!--/modal-content-->
 	</div><!--/modal-dialog-->
-</div><!--/modal-->
+</div><!--/modal-->		
+
 @stop

@@ -1,19 +1,61 @@
-angular.module('app', []).controller('appCtrl', ['$http', requisition_init]);
+angular.module('app', ['angularFileUpload'])
+	.controller('appCtrl', ['$http', 'FileUploader', '$scope', requisition_init]);
 
-function requisition_init($http){
+
+function requisition_init($http, FileUploader, $scope){
     var vm = this;
+
+    uploader = $scope.uploader = new FileUploader({
+        url: 'requisition/order_buy/finances/uploadticket',
+        removeAfterUpload: true
+    });
+    
+    uploader.onProgressItem = function(fileItem, progress) {
+        $('#submit_validate_pay_btn').html('Subiendo Baucher de Pago...');
+        $('#submit_validate_pay_btn').attr('disabled', 'disabled');
+        $('#progress_bar_file').css('width', progress+'%');
+    };
+
+    uploader.onCompleteAll = function( response, status, headers) {
+        $('#validate_pay_modal').modal('toggle');
+        $('#submit_validate_pay_btn').html('Guardar Producto');
+        $('#submit_validate_pay_btn').removeAttr('disabled');
+
+        $('#save_validate_pay_msg').html('');
+       	$('#progress_bar_file').css('width', '0%');
+        console.log(uploader.queue);
+    };
 
     $("[data-mask]").inputmask();
     vm.page = 1;
-    vm.requirement_list = {};
-	vm.requirement = {};
-	vm.requirement.id = null;
-	vm.requirement.subtotal = 0;
-	vm.requirement.iva = 0;
-	vm.requirement.total = 0;
+    vm.filter_user = 'all';
+    vm.ind = null;
+    vm.order_id = null;
+
+    vm.requisition_list = {};
+	vm.requisition = {};
+	vm.requisition.id = null;
+	vm.requisition.subtotal = 0;
+	vm.requisition.iva = 0;
+	vm.requisition.total = 0;
 
 	Product_Init();
 	Finances_Init();
+
+
+	vm.products_list = Array();
+	vm.product_list_select = {};
+
+	vm.order_buy = {};
+	vm.order_buy.date = null;
+	vm.order_buy.pay_conditions = null;
+	vm.order_buy.provider_id = null;
+	vm.order_buy.deliver_place = null;
+	vm.order_buy.new_place = null;
+	vm.order_buy.order_observations = null;
+
+	vm.order_buy_list = Array();
+	vm.providers_list_select = {};
 
 	function Finances_Init()
 	{
@@ -23,9 +65,6 @@ function requisition_init($http){
 		vm.finances.dollar_price = 0;
 		vm.finances.pesos_price = 0;
 	}//Finances_Init()
-
-	vm.products_list = Array();
-	vm.product_list_select = {};
 
 	function Product_Init()
 	{
@@ -60,15 +99,21 @@ function requisition_init($http){
   		$('#save_requisition_msg').html('');
 	});
 	
-	function OrderProductionList()
+	vm.ChangeFilterUser = function ()
 	{
+		RequisitionList();
+	}//vm.ChangeFilterUser()
+
+	function RequisitionList()
+	{
+		vm.requisition_list = {};
 		$('#requisition_list_loader').show();
-        $http.post('requisition/list')
+        $http.post('requisition/list', { page: vm.page, filter_user: vm.filter_user })
             .success(function(res) {
             	console.log(res);
             	$('#requisition_list_loader').hide();
                 if(res.status){
-                	vm.requirement_list = res.data;
+                	vm.requisition_list = res.data;
                 	RenderPage(res.tp);
                 } else {
                 	$('#requisition_list_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');	
@@ -79,9 +124,9 @@ function requisition_init($http){
         });
 	}//OrderProductionList
 
-    vm.OrderProductionList = function ()
+    vm.RequisitionList = function ()
     {
-        OrderProductionList();
+        RequisitionList();
     }//vm.GetProviderList
 
     function RenderPage(tp)
@@ -100,37 +145,37 @@ function requisition_init($http){
             $('.item_paginador').on('click', function (e){
                 e.preventDefault();
                 vm.page = $(this).text();
-                GetClientsList();
+                RequisitionList();
             });
         }
     }//PageRender
 
 	vm.SubmitRequisition = function ()
 	{
-		console.log(vm.requirement);
+		console.log(vm.requisition);
 		console.log(vm.products_list);
-		submit_requisition_btn
         $('#submit_requisition_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
         $('#submit_requisition_btn').attr('disabled', 'disabled');
         $('#cancel_requirement_btn').attr('disabled', 'disabled');
-        $http.post('requisition/save',{ requirement: vm.requirement, products: vm.products_list })
+        $http.post('requisition/save',{ requisition: vm.requisition, products: vm.products_list, page: vm.page, filter_user: vm.filter_user })
             .success(function(res) {
             	console.log(res);
         		$('#submit_requisition_btn').html('Guardar Requisición');
         		$('#submit_requisition_btn').removeAttr('disabled');
-        		$('#cancel_requirement_btn').removeAttr('disabled');
+        		$('#cancel_requisition_btn').removeAttr('disabled');
                 if(res.status){
-					vm.requirement = {};
-					vm.requirement.id = null;
-					vm.requirement.subtotal = 0;
-					vm.requirement.iva = 0;
-					vm.requirement.total = 0;
+					vm.requisition = {};
+					vm.requisition.id = null;
+					vm.requisition.subtotal = 0;
+					vm.requisition.iva = 0;
+					vm.requisition.total = 0;
                 	Product_Init();
                 	Finances_Init();
 					vm.products_list = Array();
 					vm.product_list_select = {};
-                	vm.requirement_list = res.data;
+                	vm.requisition_list = res.data;
                 	RenderPage(res.tp);
+                	$('#requisition_list_msg').html('');
 					$('#save_requisition_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');					
                 } else {
 					$('#save_requisition_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
@@ -139,7 +184,7 @@ function requisition_init($http){
             console.log(res);
     		$('#submit_requisition_btn').html('Guardar Requisición');
     		$('#submit_requisition_btn').removeAttr('disabled');
-    		$('#cancel_requirement_btn').removeAttr('disabled');
+    		$('#cancel_requisition_btn').removeAttr('disabled');
         });			
 	}//vm.SubmitRequisition()
 
@@ -148,7 +193,7 @@ function requisition_init($http){
         $http.post('requisition/get_date')
             .success(function(res) {
                 if(res.status){
-                	vm.requirement.requested_date = res.data;	
+                	vm.requisition.requested_date = res.data;	
                 }
         }).error(function (res){
             console.log(res);
@@ -157,10 +202,10 @@ function requisition_init($http){
 
 	vm.ChangeProductType = function ()
 	{
-		if(vm.requirement.product_type == 'catalog'){
+		if(vm.requisition.product_type == 'catalog'){
 			$('#catalog_product_div').show();
 			$('#new_product_div').hide();
-		} else if(vm.requirement.product_type == 'no_catalog'){
+		} else if(vm.requisition.product_type == 'no_catalog'){
 			$('#new_product_div').show();
 			$('#catalog_product_div').hide();
 		} else {
@@ -171,7 +216,7 @@ function requisition_init($http){
 		$('#importe_div').hide();
 		$('#dollar_value_id').hide();
 		$('#dollar_price_div').hide();
-		vm.requirement.filter_product = '';
+		vm.requisition.filter_product = '';
 		vm.product_list_select = {};
 		Product_Init();
 		vm.finances = {};
@@ -185,12 +230,12 @@ function requisition_init($http){
 
 	vm.ChangeFilterProduct = function ()
 	{
-		console.log(vm.requirement.filter_product);
+		console.log(vm.requisition.filter_product);
 		$('#select_product').show();
 		vm.product_list_select = {};
 		vm.product = {};
 		$('#filter_product').attr('disabled', 'disabled');
-        $http.post('requisition/product', { type: vm.requirement.filter_product })
+        $http.post('requisition/product', { type: vm.requisition.filter_product })
             .success(function(res) {
             	console.log(res);
             	$('#filter_product').removeAttr('disabled');
@@ -280,8 +325,8 @@ function requisition_init($http){
 	function CheckProduct()
 	{
 
-		if(vm.requirement.product_type == 'catalog'){
-			if( typeof(vm.requirement.filter_product) === "undefined" || vm.requirement.filter_product.length == 0 
+		if(vm.requisition.product_type == 'catalog'){
+			if( typeof(vm.requisition.filter_product) === "undefined" || vm.requisition.filter_product.length == 0 
 				|| vm.product.catalog.id == null
 				|| vm.product.catalog.unit == null
 				|| vm.product.catalog.description == null
@@ -315,7 +360,7 @@ function requisition_init($http){
 		var importe = 0;
 		
 		var msg = 'Introduzca un número valido en la Piezas del producto.';
-		if( vm.requirement.product_type == 'catalog' ){
+		if( vm.requisition.product_type == 'catalog' ){
 			if( is_number( vm.product.catalog.pieces ) == true ){
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
 				vm.finances.pesos_price = pmx;
@@ -328,7 +373,7 @@ function requisition_init($http){
 				$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
 			}
 		}
-		if( vm.requirement.product_type == 'no_catalog' ){
+		if( vm.requisition.product_type == 'no_catalog' ){
 			if( is_number( vm.product.new.pieces ) == true ){
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
 				vm.finances.pesos_price = pmx;
@@ -347,7 +392,7 @@ function requisition_init($http){
 	{
 		var importe = 0;
 		var msg = 'Introduzca un número valido en la Piezas del producto.';
-		if( vm.requirement.product_type == 'catalog' ){
+		if( vm.requisition.product_type == 'catalog' ){
 			if( vm.product.catalog.pieces == null ){
 				$('#add_product_item_btn').attr('disabled', 'disabled');
 				$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
@@ -362,7 +407,7 @@ function requisition_init($http){
 				}
 			}
 		}
-		if( vm.requirement.product_type == 'no_catalog' ){
+		if( vm.requisition.product_type == 'no_catalog' ){
 			if( vm.product.new.pieces == null ){
 				$('#add_product_item_btn').attr('disabled', 'disabled');
 				$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
@@ -396,10 +441,10 @@ function requisition_init($http){
 		var importe = 0;
 		var pmx = 0;
 		var msg = 'Introduzca un número valido en la Piezas del producto.';
-		if( vm.requirement.product_type == 'catalog' ){
+		if( vm.requisition.product_type == 'catalog' ){
 			CalculateImport();
 		}
-		if( vm.requirement.product_type == 'no_catalog' ){
+		if( vm.requisition.product_type == 'no_catalog' ){
 			CalculateImport();
 		}
 	}//vm.ChangePiecesNew
@@ -409,7 +454,7 @@ function requisition_init($http){
 		var msg = 'Introduzca un número valido en la Piezas del producto.';
 		var ban = false;
 		var pieces = 0;
-		if( vm.requirement.product_type == 'catalog' ){
+		if( vm.requisition.product_type == 'catalog' ){
 			if( is_number(vm.product.catalog.pieces) == true ){
 				pieces = vm.product.catalog.pieces;
 				ban = true;
@@ -418,7 +463,7 @@ function requisition_init($http){
 				$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
 			}		
 		}
-		if( vm.requirement.product_type == 'no_catalog' ){
+		if( vm.requisition.product_type == 'no_catalog' ){
 			if( is_number(vm.product.new.pieces) == true ){
 				pieces = vm.product.new.pieces;
 				ban = true;
@@ -441,8 +486,8 @@ function requisition_init($http){
 		var r = CheckProduct();
 		if(r == true){
 			var aux = {
-				"product_type": vm.requirement.product_type,
-				"filter_product": vm.requirement.filter_product,
+				"product_type": vm.requisition.product_type,
+				"filter_product": vm.requisition.filter_product,
 				"product_id": '',
 				"product_name": '',
 				"product_unit": '',
@@ -456,7 +501,7 @@ function requisition_init($http){
 				"pesos_price": 0,
 				"importe": 0,
 			};
-			if(vm.requirement.product_type == 'catalog'){
+			if(vm.requisition.product_type == 'catalog'){
 				aux.product_id 			= vm.product.catalog.id;
 				aux.product_name 		= vm.product.catalog.description;
 				aux.product_unit 		= vm.product.catalog.unit;
@@ -469,7 +514,7 @@ function requisition_init($http){
 				aux.pesos_price 		= vm.finances.pesos_price;
 				aux.importe 			= vm.finances.importe;
 			}
-			if(vm.requirement.product_type == 'no_catalog'){
+			if(vm.requisition.product_type == 'no_catalog'){
 				aux.product_id 			= null;
 				aux.product_name 		= vm.product.new.name;
 				aux.product_unit 		= vm.product.new.unit;
@@ -498,8 +543,8 @@ function requisition_init($http){
 
 			$('#catalog_product_div').hide();
 			$('#new_product_div').hide();
-			vm.requirement.filter_product = '';
-			vm.requirement.product_type = '';
+			vm.requisition.filter_product = '';
+			vm.requisition.product_type = '';
 			CalculateTotal();
 			console.log(vm.products_list);
 		} else {
@@ -514,23 +559,28 @@ function requisition_init($http){
 		for(i in vm.products_list ){
 			subt = parseFloat(subt)+parseFloat(vm.products_list[i].importe);
 		}
-		vm.requirement.subtotal = subt;
-		vm.requirement.iva = 0;
-		vm.requirement.total = subt;
+		vm.requisition.subtotal = subt;
+		//vm.requisition.iva = 0;
+		vm.requisition.total = subt;
+		CalculateIVA();
 	}//CalculateTotal
 
 	vm.ChangeIVA = function ()
 	{
-		var iva = 0;
-		vm.requirement.total = 0;
-		console.log(vm.requirement.iva);
-		if( vm.requirement.iva.length != 0 ){
-			iva = (vm.requirement.subtotal * parseFloat(vm.requirement.iva) )/100;
-			vm.requirement.total = parseFloat(vm.requirement.subtotal) + parseFloat(iva);
-			vm.requirement.total = vm.requirement.total.toFixed(2);
-
-		}
+		CalculateIVA();
 	}//vm.ChangeIVA
+
+	function CalculateIVA()
+	{
+		var iva = 0;
+		vm.requisition.total = 0;
+
+		if( vm.requisition.iva.length != 0 ){
+			iva = (vm.requisition.subtotal * parseFloat(vm.requisition.iva) )/100;
+			vm.requisition.total = parseFloat(vm.requisition.subtotal) + parseFloat(iva);
+			vm.requisition.total = vm.requisition.total.toFixed(2);
+		}
+	}//CalculateIVA
 
 	function is_number(numero)
 	{
@@ -541,37 +591,87 @@ function requisition_init($http){
     	}
   	}//is_number
 
-  	vm.EditRequirement = function (ind)
+  	vm.EditRequisition = function (ind)
   	{
-  		console.log(vm.requirement_list[ind].id);
-  		vm.requirement.id = vm.requirement_list[ind].id;
-  		vm.requirement.requested_date = vm.requirement_list[ind].requested_date;
-  		vm.requirement.required_date = vm.requirement_list[ind].required_date;
+  		vm.ind = ind;
+  		console.log(vm.requisition_list[ind].id);
+  		vm.requisition.id = vm.requisition_list[ind].id;
+  		vm.requisition.requested_date = vm.requisition_list[ind].requested_date;
+  		vm.requisition.required_date = vm.requisition_list[ind].required_date;
 
-  		vm.products_list = vm.requirement_list[ind].products;
+  		vm.products_list = vm.requisition_list[ind].products;
 
-		vm.requirement.subtotal = vm.requirement_list[ind].subtotal;
-		vm.requirement.iva = vm.requirement_list[ind].iva;
-		vm.requirement.total = vm.requirement_list[ind].total;
+		vm.requisition.subtotal = vm.requisition_list[ind].subtotal;
+		vm.requisition.iva = vm.requisition_list[ind].iva;
+		vm.requisition.total = vm.requisition_list[ind].total;
 
-		vm.requirement.use = vm.requirement_list[ind].use;
-		vm.requirement.observations = vm.requirement_list[ind].observations;
+		vm.requisition.use = vm.requisition_list[ind].use;
+		vm.requisition.observations = vm.requisition_list[ind].observations;
+		if(vm.requisition_list[ind].pre_order == 1){
+			$('#required_date').attr('disabled', 'disabled');
+			$('#iva').attr('disabled', 'disabled');
+			$('#use').attr('disabled', 'disabled');
+			$('#observations').attr('disabled', 'disabled');
+			
+			$('#submit_requisition_btn').attr('disabled', 'disabled');
+			$('#submit_requisition_btn').hide();
+			$('#product_type_div').hide();
+			$('#finances_info').hide();
+			$('#add_product_item_btn').attr('disabled', 'disabled');
+			$('#add_product_item_btn').hide();
+		} else {
+			$('#required_date').removeAttr('disabled');
+			$('#iva').removeAttr('disabled');
+			$('#use').removeAttr('disabled');
+			$('#observations').removeAttr('disabled');
+			
+			$('#submit_requisition_btn').removeAttr('disabled');
+			$('#submit_requisition_btn').show();
+			$('#product_type_div').show();
+			$('#finances_info').show();
+			$('#add_product_item_btn').removeAttr('disabled');
+			$('#add_product_item_btn').show();
+		}
   		$('#save_requisition_modal').modal('toggle');
   	}//EditRequirement
 
-  	vm.DeleteRequirement = function (ind)
+  	vm.EditProductPieces = function (ind)
+  	{
+  		if(vm.requisition_list[vm.ind].pre_order == 0){
+  			var n = prompt('Cambiar Número de Piezas', '');
+  			if( n.length != 0 || is_number(n) == true){
+				vm.requisition_list[vm.ind].products[ind].product_pieces = n;
+				vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
+				console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
+				CalculateTotal();
+				CalculateIVA();
+  			} else {
+  				alert('Introduza un Número Valido');
+  			}
+  		}
+  	}//vm.EditProductPieces
+
+  	vm.CancelRequisition = function ()
+  	{
+  		if(vm.requisition.id != null){
+  			vm.requisition.id = null;
+ 			RequisitionList();
+  		}
+  	}//CancelRequisition()
+
+  	vm.DeleteRequisition = function (ind)
   	{
   		var r = confirm('¿Desea Eliminar esta Requisición?');
   		if(r == true){
-  			$('#req_del_'+vm.requirement_list[ind].id).html('<i class="fa fa-spinner fa-spin fa-1x"></i>');
-  			$('#req_del_'+vm.requirement_list[ind].id).attr('disabled', 'disabled');
-	        $http.post('requisition/delete', { id:vm.requirement_list[ind].id })
+  			$('#req_del_'+vm.requisition_list[ind].id).html('<i class="fa fa-spinner fa-spin fa-1x"></i>');
+  			$('#req_del_'+vm.requisition_list[ind].id).attr('disabled', 'disabled');
+	        $http.post('requisition/delete', { id:vm.requisition_list[ind].id })
 	            .success(function(res) {
 	            	console.log(res);
-                    $('#req_del_'+vm.requirement_list[ind].id).removeAttr('disabled');
-                    $('#req_del_'+vm.requirement_list[ind].id).html('<i class="fa fa-trash"></i>');
+                    $('#req_del_'+vm.requisition_list[ind].id).removeAttr('disabled');
+                    $('#req_del_'+vm.requisition_list[ind].id).html('<i class="fa fa-trash"></i>');
 	                if(res.status){
-                        vm.requirement_list = res.data;
+                        vm.requisition_list = res.data;
                         RenderPage(res.tp);
 	                } else {
 						$('#requisition_list_msg').add('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
@@ -580,6 +680,188 @@ function requisition_init($http){
 	            console.log(res);
 	        });
   		}
-  	}//DeleteRequirement
+  	}//DeleteRequisition
+
+  	$('#new_place_div').hide();
+  	$('#select_providers').hide();
+
+  	vm.ConvertRequisition = function (ind)
+  	{	
+  		vm.order_id = vm.requisition_list[ind].id;
+		vm.order_buy_list = vm.requisition_list[ind].products;
+		GetProviders();
+  		if(vm.requisition_list[ind].pre_order == 1){
+  			
+  			vm.order_buy.date 					= vm.requisition_list[ind].date;
+  			vm.order_buy.pay_conditions 		= vm.requisition_list[ind].pay_conditions;
+  			vm.order_buy.provider_id 			= vm.requisition_list[ind].provider_id;
+  			vm.order_buy.deliver_place 			= vm.requisition_list[ind].deliver_place;
+  			if(vm.order_buy.deliver_place == 'other'){
+ 				$('#order_buy_new_place').show();
+  			} else{
+  				$('#order_buy_new_place').hide();
+  			}
+  			vm.order_buy.new_place 				= vm.requisition_list[ind].new_place;
+  			vm.order_buy.order_observations 	= vm.requisition_list[ind].order_observations;
+
+  			$('#order_buy_date').attr('disabled', 'disabled');
+  			$('#order_buy_pay_conditions').attr('disabled', 'disabled');
+  			$('#provider_id').attr('disabled', 'disabled');
+			$('#order_buy_deliver_place').attr('disabled', 'disabled');
+
+			$('#order_buy_new_place').attr('disabled', 'disabled');
+			$('#order_buy_observations').attr('disabled', 'disabled');
+			$('#submit_order_buy_btn').attr('disabled', 'disabled');
+			$('#submit_order_buy_btn').hide();
+  		} else {
+			vm.order_buy.date = null;
+			vm.order_buy.pay_conditions = null;
+			vm.order_buy.provider_id = null;
+			vm.order_buy.deliver_place = null;
+			vm.order_buy.new_place = null;
+			vm.order_buy.order_observations = null;
+			$('#order_buy_new_place').hide();
+  			$('#order_buy_date').removeAttr('disabled');
+  			$('#order_buy_pay_conditions').removeAttr('disabled');
+  			$('#provider_id').removeAttr('disabled');
+			$('#order_buy_deliver_place').removeAttr('disabled');
+			$('#order_buy_new_place').removeAttr('disabled');
+			$('#order_buy_observations').removeAttr('disabled');
+			$('#submit_order_buy_btn').removeAttr('disabled');
+			$('#submit_order_buy_btn').show();
+  		}
+		$('#convert_requisition_modal').modal('toggle');
+  	}//vm.ConvertRequisition
+
+  	function GetProviders()
+  	{
+  		vm.providers_list_select = {};
+  		$('#select_providers').show();
+        $http.post('requisition/order_buy/providers')
+            .success(function(res) {
+            	console.log(res);
+				$('#select_providers').hide();
+                if(res.status){
+                    vm.providers_list_select = res.data;
+                } else {
+					$('#save_order_buy_msg').add('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+        	$('#select_providers').hide();
+            console.log(res);
+        });
+  	}//GetProviders
+
+  	vm.ChangeDeliverPlace = function ()
+  	{
+  		if(vm.order_buy.deliver_place == 'other'){
+  			$('#new_place_div').show();
+  		}
+  		if(vm.order_buy.deliver_place != 'other'){
+  			$('#new_place_div').hide();
+  		}
+  	}//vm.ChangeDeliverPlace()
+
+  	vm.CancelOrderBuy = function ()
+  	{
+  		vm.order_buy = {};
+		vm.order_buy_list = Array();
+		vm.providers_list_select = {};
+  	}//vm.CancelOrderBuy
+
+  	vm.SubmitConvertRequisition = function ()
+  	{
+  		
+        $('#submit_order_buy_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
+        $('#submit_order_buy_btn').attr('disabled', 'disabled');
+        $('#cancel_order_buy_btn').attr('disabled', 'disabled');
+        $http.post('requisition/order_buy/save', { order_buy: vm.order_buy, id: vm.order_id, page: vm.page, filter_user: vm.filter_user })
+            .success(function(res) {
+            	console.log(res);
+        		$('#submit_order_buy_btn').html('Convertir a Orden de Compra');
+        		$('#submit_order_buy_btn').removeAttr('disabled');
+        		$('#cancel_order_buy_btn').removeAttr('disabled');
+                if(res.status){
+					vm.order_buy = {};
+					vm.order_buy.date = null;
+					vm.order_buy.pay_conditions = null;
+					vm.order_buy.provider_id = null;
+					vm.order_buy.deliver_place = null;
+					vm.order_buy.new_place = null;
+					vm.order_buy.order_observations = null;
+
+					vm.providers_list_select = {};
+
+                	vm.requisition_list = res.data;
+                	RenderPage(res.tp);
+					$('#requisition_list_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');                
+					$('#convert_requisition_modal').modal('toggle');
+                } else {
+					$('#save_order_buy_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+        	console.log(res);
+        	$('#submit_order_buy_btn').html('Convertir a Orden de Compra');
+        	$('#submit_order_buy_btn').removeAttr('disabled');
+        	$('#cancel_order_buy_btn').removeAttr('disabled');
+        });
+  	}//vm.ConvertRequisition
+
+  	vm.ValidatePayRequisition = function (ind)
+  	{
+  		vm.order_id = vm.requisition_list[ind].id;
+  		$('#validate_pay_modal').modal('toggle');
+  	}//vm.ValidatePayRequisition
+
+  	vm.SubmitValidatePayRequsition = function ()
+  	{
+        if(uploader.queue.length > 0){
+            if(uploader.queue.length == 1){
+                if(uploader.queue[0]._file.size < 5000000){
+                	SaveValidatePayRequisitionAjax();
+                } else {
+                	$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>El archivo debe de pesar menos de 5.00MB</div>');
+                }
+            } else {
+				$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Solo se puede seleeccionar un archivo.</div>');
+            }
+        } else {
+        	$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Seleccione un archivo</div>');
+        }
+  	}//vm.SubmitValidatePayRequsition()
+
+  	function SaveValidatePayRequisitionAjax()
+  	{
+        $http.post('requisition/order_buy/finances/validate', { order_id: vm.order_id, page: vm.page, filter_user: vm.filter_user })
+            .success(function(res) {
+                console.log(res);
+                $('#submit_validate_pay_btn').html('Validar Pago de Requisición');
+                $('#submit_validate_pay_btn').removeAttr('disabled');
+                $('#save_validate_pay_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                if(res.status){
+					uploader.queue[0].upload();
+                	vm.requisition_list = res.data;
+                	RenderPage(res.tp);
+                } else {
+					$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+			$('#submit_validate_pay_btn').html('Validar Pago de Requisición');
+			$('#submit_validate_pay_btn').removeAttr('disabled');
+            console.log(res);
+        });
+  	}//SaveValidatePayRequisitionAjax
+
+  	vm.CancelValidatePay = function ()
+  	{
+
+  	}//vm.CancelValidatePay()
+
+  	vm.ViewPayTicket = function (ind)
+  	{
+  		$('#view_pay').attr('src', '../order_buy_ticket/'+vm.requisition_list[ind].ticket_pay_file);
+
+  		$('#view_pay_modal').modal('toggle');
+  	}//vm.ViewPayTicket
 
 }//index_init

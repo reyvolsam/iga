@@ -9,6 +9,7 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Selling', 'namespace'
 	Route::post('selling/send_list', 'SellingController@ClientsSendsList');
 	Route::post('selling/clients/save', 'SellingController@ClientsSave');
 	Route::post('selling/clients/delete', 'SellingController@ClientDelete');
+	Route::post('selling/clients/pc', 'SellingController@ClientPC');
 
     Route::resource('selling', 'SellingController');
     

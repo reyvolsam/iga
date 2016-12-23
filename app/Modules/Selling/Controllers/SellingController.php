@@ -137,6 +137,7 @@ class SellingController extends Controller {
 							$data['send'] = json_encode($data['send']);
 
 							if($id == null){
+								$data['updated_at'] = date('Y-m-d H:i:s');
 								$data['created_at'] = date('Y-m-d H:i:s');
 								DB::table('clients')
 										->insert($data);
@@ -267,6 +268,30 @@ class SellingController extends Controller {
 		}
 		return response()->json($this->res);
 	}//ClientDelete
+
+	public function ClientPC()
+	{
+		try{
+			$pc = $this->request->input('pc');
+
+			if( !empty($pc) ){
+				$cpl = DB::table('CodigosPostales')
+						->where('CodigoPostal', '=', $pc)
+						->get();
+				if( count($cpl) > 0 ){
+					$this->res['data'] = $cpl;
+					$this->res['status'] = true;
+				} else {
+					$this->res['msg'] = 'No existe este Codigo Postal.';
+				}
+			} else {
+				$this->res['msg'] = 'Introduzca un Codigo Postal Valido.';
+			}
+		} catch (\Exception $e) {
+			$this->res['msg'] = '¡Error!.'.$e;
+		}
+		return response()->json($this->res);
+	}//ClientPC
 
 	/**
 	 * Display a listing of the resource.

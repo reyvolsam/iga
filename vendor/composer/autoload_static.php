@@ -310,6 +310,7 @@ class ComposerStaticInitb65af2ab80d5805a2e9f992367d2635c
         'Cartalyst\\Sentry\\Users\\UserNotFoundException' => __DIR__ . '/..' . '/cartalyst/sentry/src/Cartalyst/Sentry/Users/Exceptions.php',
         'Cartalyst\\Sentry\\Users\\WrongPasswordException' => __DIR__ . '/..' . '/cartalyst/sentry/src/Cartalyst/Sentry/Users/Exceptions.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+        'CreateQualitiesTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_14_183238_create_qualities_table.php',
         'CreateSellingsTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_06_213931_create_sellings_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',

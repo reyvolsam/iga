@@ -35,12 +35,22 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 	Route::post('supplaying/order_production/data', 'SupplayingController@OrderProductionData');
 	Route::post('supplaying/order_production/validate', 'SupplayingController@OrderProductionValidate');
 
-	Route::get('supplaying/requisition', 'SupplayingController@RequisitionIndex');
-	Route::post('supplaying/requisition/get_date', 'SupplayingController@RequisitionDate');
-	Route::post('supplaying/requisition/product', 'SupplayingController@RequisitionProductList');
-	Route::post('supplaying/requisition/save', 'SupplayingController@RequisitionSave');
-	Route::post('supplaying/requisition/list', 'SupplayingController@RequisitionList');
-	Route::post('supplaying/requisition/delete', 'SupplayingController@RequisitionDelete');
+	Route::get('supplaying/requisition', 'RequisitionController@RequisitionIndex');
+	Route::post('supplaying/requisition/get_date', 'RequisitionController@RequisitionDate');
+	Route::post('supplaying/requisition/product', 'RequisitionController@RequisitionProductList');
+	Route::post('supplaying/requisition/save', 'RequisitionController@RequisitionSave');
+	Route::post('supplaying/requisition/list', 'RequisitionController@RequisitionList');
+	Route::post('supplaying/requisition/delete', 'RequisitionController@RequisitionDelete');
+	Route::post('supplaying/requisition/order_buy/providers', 'RequisitionController@OrderBuyProviders');
+	Route::post('supplaying/requisition/order_buy/save', 'RequisitionController@OrderBuySave');
+	Route::post('supplaying/requisition/order_buy/finances/validate', 'RequisitionController@OrderBuyFinancesValidate');
+	Route::post('supplaying/requisition/order_buy/finances/uploadticket', 'RequisitionController@OrderBuyFinancesUpload');
+	
+
+	Route::get('supplaying/order_buy', 'RequisitionController@OrderBuyIndex');
+
+	
+	//Route::post('supplaying/order_buy/save', 'RequisitionController@OrderBuySave');
 
 	/*Route::get('supplaying/product/material/type', 'ProductController@ProductMaterialTypeIndex');
 	Route::post('supplaying/product/material/type/save', 'ProductController@ProductMaterialTypeSave');
