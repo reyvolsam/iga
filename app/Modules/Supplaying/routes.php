@@ -45,9 +45,11 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 	Route::post('supplaying/requisition/order_buy/save', 'RequisitionController@OrderBuySave');
 	Route::post('supplaying/requisition/order_buy/finances/validate', 'RequisitionController@OrderBuyFinancesValidate');
 	Route::post('supplaying/requisition/order_buy/finances/uploadticket', 'RequisitionController@OrderBuyFinancesUpload');
+	Route::post('supplaying/requisition/order_buy/finalize', 'RequisitionController@OrderBuyFinalize');
 	
 
 	Route::get('supplaying/order_buy', 'RequisitionController@OrderBuyIndex');
+	Route::post('supplaying/order_buy/list', 'RequisitionController@OrderBuyList');
 
 	
 	//Route::post('supplaying/order_buy/save', 'RequisitionController@OrderBuySave');

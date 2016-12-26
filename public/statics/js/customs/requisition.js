@@ -832,6 +832,9 @@ function requisition_init($http, FileUploader, $scope){
 
   	function SaveValidatePayRequisitionAjax()
   	{
+        $('#submit_validate_pay_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
+        $('#submit_validate_pay_btn').attr('disabled', 'disabled');
+        $('#cancel_validate_pay_btn').attr('disabled', 'disabled');
         $http.post('requisition/order_buy/finances/validate', { order_id: vm.order_id, page: vm.page, filter_user: vm.filter_user })
             .success(function(res) {
                 console.log(res);
@@ -848,6 +851,7 @@ function requisition_init($http, FileUploader, $scope){
         }).error(function (res){
 			$('#submit_validate_pay_btn').html('Validar Pago de Requisición');
 			$('#submit_validate_pay_btn').removeAttr('disabled');
+			$('#cancel_validate_pay_btn').removeAttr('disabled');
             console.log(res);
         });
   	}//SaveValidatePayRequisitionAjax
@@ -859,9 +863,36 @@ function requisition_init($http, FileUploader, $scope){
 
   	vm.ViewPayTicket = function (ind)
   	{
+  		vm.order_id = vm.requisition_list[ind].id;
   		$('#view_pay').attr('src', '../order_buy_ticket/'+vm.requisition_list[ind].ticket_pay_file);
 
   		$('#view_pay_modal').modal('toggle');
   	}//vm.ViewPayTicket
+
+  	vm.FinalizeOrderBuy = function ()
+  	{
+  		var r = confirm('¿Desea convertir esta Requisición a Orden de Compra?');
+  		if(r == true){
+			$('#finalize_order_buy_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
+			$('#finalize_order_buy_btn').removeAttr('disabled');
+			$('#cancel_order_buy_view_btn').attr('disabled', 'disabled');
+	        $http.post('requisition/order_buy/finalize', { order_id: vm.order_id, page: vm.page, filter_user: vm.filter_user })
+	            .success(function(res) {
+	                console.log(res);
+	                $('#finalize_order_buy_btn').html('Validar Pago de Requisición');
+	                $('#finalize_order_buy_btn').removeAttr('disabled');
+	                if(res.status){
+	                	vm.requisition_list = res.data;
+	                	RenderPage(res.tp);
+	                } else {
+						$('#view_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+	                }
+	        }).error(function (res){
+				$('#finalize_order_buy_btn').html('Validar Pago de Requisición');
+				$('#finalize_order_buy_btn').removeAttr('disabled');
+	            console.log(res);
+	        });
+  		}
+  	}//vm.FinalizeOrderBuy
 
 }//index_init

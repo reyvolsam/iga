@@ -500,7 +500,8 @@
 			<div id = "view_pay_msg"></div><!-- requisition_list_msg-->
 			<div class = "clearfix"></div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+				<button type="button" class="btn btn-danger" id = "cancel_order_buy_view_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+				<button type="button" class="btn btn-success" id = "finalize_order_buy_btn" ng-click = "vm.FinalizeOrderBuy();" data-dismiss="modal" aria-hidden="true">Finalizar Orden de Compra</button>
 			</div>
 		</div><!--/modal-content-->
 	</div><!--/modal-dialog-->

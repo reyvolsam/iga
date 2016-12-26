@@ -34,41 +34,18 @@
   				<th>Fecha</th>
   				<th>Condición de Pago</th>
   				<th>Total</th>
-  				<th>Acciones</th>
   			</thead>
   			<tbody ng-repeat = "elem in vm.orders_buy_list" ng-init = "cont = $index">
   				<tr>
   					<td>#@{{ elem.id }}</td>
   					<td>@{{ elem.group_name }}</td>
-  					<td>@{{ elem.order_buy_date }}</td>
+  					<td>@{{ elem.date }}</td>
   					<td>@{{ elem.pay_conditions }}</td>
   					<td>@{{ elem.total | currency }}</td>
-  					<td>  </td>
   				</tr>
   			</tbody>
   		</table>
   		<i  id = "orders_buy_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	</div><!--/box-body-->
 </div><!--/box-->
-
-
-<div class="modal fade" id = "save_requisition_modal" tabindex = "-1" role="dialog" aria-labelledby="save_requisition_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title">Ordenes de Compra</h4>
-			</div>
-			<form method = "post" ng-submit = "vm.SaveOrdersBuy();">
-				<div class="modal-body">
-
-				</div><!--/modal-body-->
-				<div id = "save_orders_buy_msg"></div><!-- requisition_list_msg-->
-				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" id = "cancel_orders_buy_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
-					<button type = "submit" class = "btn btn-success" id = "submit_orders_buy_btn">Guardar Orden de Compra</button>
-				</div>
-			</form>
-		</div><!--/modal-content-->
-	</div><!--/modal-dialog-->
-</div><!--/modal-->
 @stop

@@ -8,7 +8,8 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
         "laravelcollective/html": "5.1.*",
-        "cartalyst/sentry": "dev-feature/laravel-5"
+        "cartalyst/sentry": "dev-feature/laravel-5",
+        "barryvdh/laravel-dompdf": "0.4.*"        
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
