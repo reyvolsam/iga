@@ -95,6 +95,7 @@ class RequisitionController extends Controller {
 			$requirement = $this->request->input('requisition');
 			$products = $this->request->input('products');
 			$pag = $this->request->input('page');
+			$filter_user = $this->request->input('filter_user');
 
 			$data['id'] 			= $requirement['id'];
 			$data['requested_date'] = $requirement['requested_date'];
@@ -132,7 +133,7 @@ class RequisitionController extends Controller {
 						DB::table('requisitions')
 								->insert($data);
 						$this->res['status'] = true;
-						$this->RequisitionListInterface($pag);
+						$this->RequisitionListInterface($pag, $filter_user);
 						$this->res['msg'] = 'Requisición Guardada Correctamente';
 					} else {
 						$data['updated_at'] = date('Y-m-d H:i:s');
@@ -140,7 +141,7 @@ class RequisitionController extends Controller {
 								->where('id', '=', $data['id'])
 								->update($data);
 						$this->res['status'] = true;
-						$this->RequirementListInterface($pag);
+						$this->RequirementListInterface($pag, $filter_user);
 						$this->res['msg'] = 'Requisición Actualizada Correctamente';
 					}
 				} else {
