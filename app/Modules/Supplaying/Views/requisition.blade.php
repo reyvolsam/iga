@@ -1,11 +1,11 @@
 @extends('layouts.master')
 
 @section('page_name')
-  	<h1>Producción<small>Requisición</small></h1>
+  	<h1>Producción<small>Requisiciones</small></h1>
   	<ol class="breadcrumb">
 	    <li><a href="{{URL::to('/')}}"><i class="fa fa-dashboard"></i> Principal</a></li>
 	    <li>Producción</a></li>
-    	<li class = "active">Requisición</a></li>
+    	<li class = "active">Requisiciones</a></li>
   	</ol>
 @stop
 
