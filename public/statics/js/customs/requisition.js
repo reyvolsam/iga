@@ -311,22 +311,41 @@ function requisition_init($http){
 				|| vm.product.catalog.description == null
 				|| vm.product.catalog.use == null
 				|| vm.product.catalog.pieces == null ){
+				console.log('primer r');
 				return false;
 			} else {
-				return true;
+				if( vm.product.new.unit == 'Other' ){
+					if( typeof(vm.product.new.new_unit) === "undefined" || vm.product.new.new_unit == 0  ){
+						console.log('segundo r');
+						return false;
+					} else {
+						console.log('primer t');
+						return true;
+					}
+				}
+				//return true;
 			}
-		} else if( vm.product.new.name == null
+		} else if(vm.requisition.product_type == 'no_catalog'){
+			if( vm.product.new.name == null
 					|| vm.product.new.unit == null
 					|| vm.product.new.use == null
 					|| vm.product.new.description == null
-					|| vm.product.catalog.pieces == null ){
-			return false;
-		} else {
-			if( vm.product.new.unit == 'Other' ){
-				if( typeof(vm.product.new.new_unit) === "undefined" || vm.product.new.new_unit == 0  ){
-					return false;
+					|| vm.product.new.pieces == null ){
+				console.log(vm.product);
+				console.log('tercer r');
+				return false;
+			} else {
+				if( vm.product.new.unit == 'Other' ){
+					if( typeof(vm.product.new.new_unit) === "undefined" || vm.product.new.new_unit == 0  ){
+						console.log('cuarto r');
+						return false;
+					} else {
+						console.log('segundo t');
+						return true;
+					}
 				} else {
-					return true;
+					console.log('tercer t');
+					return true
 				}
 			}
 		}
