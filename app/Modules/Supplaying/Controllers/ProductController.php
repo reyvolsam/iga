@@ -40,6 +40,8 @@ class ProductController extends Controller {
 			$type = null;
 			$id 					= $this->request->input('id');
 			$type 					= $this->request->input('type');
+
+			$pag 					= $this->request->input('page');
 			
 			switch ($type) {
 				case 'raw_material':
@@ -87,6 +89,7 @@ class ProductController extends Controller {
 										$this->res['msg'] = 'Materia Prima Actualizada Correctamente.';
 										$this->res['status'] = true;
 									}
+									$this->ProductListInterface($type, $pag);
 								} else {
 									$this->res['msg'] = 'Codigo de Producto repetido.';
 								}
@@ -360,13 +363,9 @@ class ProductController extends Controller {
 		echo json_encode($this->res);
 	}//UploadImgProduct
 
-	public function ProductList()
+	public function ProductListInterface($type, $pag)
 	{
 		try {
-			$type = null;
-			$type 					= $this->request->input('type');
-			$pag 					= $this->request->input('page');
-			
 			$rowsPerPage = 10;
 			$total_rows = 0;
 			$offset = ($pag - 1) * $rowsPerPage;
@@ -374,7 +373,7 @@ class ProductController extends Controller {
 			switch ($type) {
 				case 'raw_material':
 					$l = DB::table('raw_material_products')
-							->select('raw_material_products.id', 'raw_material_products.technical_file', 'raw_material_products.code', 'raw_material_products.name', 'raw_material_products.max', 'raw_material_products.min', 'raw_material_products.unit', 'raw_material_products.description', 'providers.id AS provider_id', 'providers.name as provider_name')
+							->select('raw_material_products.id', 'raw_material_products.technical_file', 'raw_material_products.code', 'raw_material_products.name', 'raw_material_products.max', 'raw_material_products.min', 'raw_material_products.unit', 'raw_material_products.description', 'providers.id AS provider_id', 'providers.name as provider_name', 'raw_material_products.technical_file')
 							->join('providers', 'providers.id', '=', 'raw_material_products.provider_id')
 							->orderBy('id', 'desc')
 							->skip($offset)
@@ -453,6 +452,22 @@ class ProductController extends Controller {
 		}
 		return response()->json($this->res);
 	}//ProductList
+
+	public function ProductList()
+	{
+		try{
+			$type = null;
+
+			$type 					= $this->request->input('type');
+			$pag 					= $this->request->input('page');
+
+			$this->ProductListInterface($type, $pag);
+
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);
+	}//ProductListInterface
 
 	public function ProductTypeView()
 	{

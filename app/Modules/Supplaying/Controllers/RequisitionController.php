@@ -9,8 +9,11 @@ use App\Modules\Supplaying\Models;
 
 use App\Modules\Users\Controllers\UsersController;
 
+use Mail;
 use Validator;
 use DB;
+use PDF;
+use DateTime;
 
 class RequisitionController extends Controller {
 
@@ -159,7 +162,7 @@ class RequisitionController extends Controller {
 			$total_rows = 0;
 			$total_paginas = 0;
 			$offset = ($pag - 1) * $rowsPerPage;
-			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) ){
+			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
 				$q = DB::table('requisitions')
 							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
 							->join('groups', 'groups.id', '=', 'requisitions.group_id');
@@ -171,7 +174,8 @@ class RequisitionController extends Controller {
 					$q2 = $q2->where('group_id', '=', $filter_user);
 				}
 
-				$cl = $q->where('requisitions.final_order', '=', 0)
+				$cl = $q->where('pre_order', '=', 0)
+						->where('finances_validate', '=', 0)
 						->orderBy('requisitions.id', 'desc')
 						->skip($offset)
 						->take($rowsPerPage)
@@ -185,19 +189,26 @@ class RequisitionController extends Controller {
 						->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
 						->join('groups', 'groups.id', '=', 'requisitions.group_id')
 						->where('requisitions.user_id', '=', \Sentry::getUser()->id)
-						->where('requisitions.final_order', '=', 0)
+						->where('pre_order', '=', 0)
+						->where('finances_validate', '=', 0)
 						->orderBy('requisitions.id', 'desc')
 						->skip($offset)
 						->take($rowsPerPage)
 						->get();
 				$total_rows = DB::table('requisitions')
 									->where('user_id', '=', \Sentry::getUser()->id)
+									->where('pre_order', '=', 0)
+									->where('finances_validate', '=', 0)
 									->count();
 				$msg = 'No hay Requisiciones hasta el momento.';
 			}
 			foreach ($cl as $kc => $vc) {
 				$vc->products 	= str_replace("'", '"', $vc->products);
 				$vc->products 	= json_decode($vc->products);
+				$datetime1 = new DateTime(Date('Y-m-d H:i:s'));
+				$datetime2 = new DateTime($vc->required_date);
+				$interval = $datetime1->diff($datetime2);
+				$vc->left_days = $interval->format('%R%a');
 			}
 			if( count($cl) > 0 ){
 				if($rowsPerPage <= $total_rows){
@@ -247,13 +258,122 @@ class RequisitionController extends Controller {
 		return response()->json($this->res);
 	}//RequisitionDelete
 
-	public function OrderBuyIndex()
+
+	public function RequisitionPDF($id)
+	{
+		//try{
+			$r = DB::table('requisitions')
+						->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'users.name', 'users.first_name', 'users.last_name', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total')
+						->join('users', 'users.id', '=', 'requisitions.user_id')
+						->join('groups', 'groups.id', '=', 'requisitions.group_id')
+						->where('requisitions.id', '=', $id)
+						->first();
+			$r->products = json_decode($r->products);
+
+			//echo "<pre>".print_r($r, true)."</pre>";
+	        //$pdf = App::make('dompdf');
+	        //$pdf->loadHTML( View::make('almacen.pdf')->with(array('data' => $data, 'nombre_sol' => $nombre_sol, 'apellidos_sol' => $apellidos_sol)) );
+	        //return $pdf->download('requisicion'.$id.'.pdf'); 
+
+			//$pdf = make('dompdf.wrapper');
+			$pdf = PDF::loadView('Supplaying::requisition_pdf', ['data' => $r, ]);
+			return $pdf->download('requisition'.$id.'.pdf');
+			//PDF::loadHTML( $this->request->view('Supplaying::requisition_pdf')->with(array('data' => $r, 'nombre_sol' => \Sentry::getUser()->first_name, 'apellidos_sol' => \Sentry::getUser()->last_name)) );
+			//return PDF::download('requisicion'.$id.'.pdf');
+		/*} catch (\Exception $e) {
+			$this->res['msg'] = '¡Error!.'.$e;
+		}*/
+		//return response()->json($this->res);
+	}//RequisitionPDF
+
+
+	public function RequisitionValidateIndex()
 	{
 		try{
 			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) 
-				|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
-					return view("Supplaying::order_buy", ['request' => $this->request, 'ru' => $this->ru]);				
+				|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) 
+				|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') )){
+					return view("Supplaying::requisition_validate", ['request' => $this->request, 'ru' => $this->ru]);				
 			}
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);
+	}//
+
+	public function RequisitionValidateInterface($pag, $filter_user)
+	{
+		try{
+			$rowsPerPage = 10;
+			$total_rows = 0;
+			$total_paginas = 0;
+			$offset = ($pag - 1) * $rowsPerPage;
+			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) ){
+				$q = DB::table('requisitions')
+							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'providers.contacts AS provider_contacts')
+							->join('groups', 'groups.id', '=', 'requisitions.group_id')
+							->join('providers', 'providers.id', '=', 'requisitions.provider_id');
+				
+				$q2 = DB::table('requisitions');
+
+				if($filter_user != 'all'){
+					$q = $q->where('groups.id', '=', $filter_user);
+					$q2 = $q2->where('group_id', '=', $filter_user);
+				}
+
+				$cl = $q->where('requisitions.finances_validate', '=', 0)
+						->where('pre_order', '=', 1)
+						->orderBy('requisitions.id', 'desc')
+						->skip($offset)
+						->take($rowsPerPage)
+						->get();
+
+				$total_rows = $q2->count();
+
+				$msg = 'No hay Requisiciones hasta el momento.';
+			}
+			foreach ($cl as $kc => $vc) {
+				$vc->products 	= str_replace("'", '"', $vc->products);
+				$vc->products 	= json_decode($vc->products);
+
+				$vc->provider_contacts = str_replace("'", '"', $vc->provider_contacts);
+				$vc->provider_contacts 	= json_decode($vc->provider_contacts);
+			}
+			if( count($cl) > 0 ){
+				if($rowsPerPage <= $total_rows){
+					$total_paginas = 1;
+				}
+				$total_paginas = ceil($total_rows / $rowsPerPage);
+				$this->res['tp'] = $total_paginas;
+				$this->res['status'] = true;
+				$this->res['data'] = $cl;
+				$this->res['msg'] = '';
+			} else {
+				$this->res['msg'] = $msg;
+			}
+		} catch (\Exception $e) {
+			$this->res['msg'] = '¡Error!.'.$e;
+		}
+		return response()->json($this->res);
+	}//RequisitionValidateList
+
+	public function RequisitionValidateList()
+	{
+		try{
+			$filter_user = $this->request->input('filter_user');
+			$pag = $this->request->input('page');
+
+			$this->RequisitionValidateInterface($pag, $filter_user);
+		} catch (\Exception $e) {
+			$this->res['msg'] = '¡Error!.'.$e;
+		}
+		return response()->json($this->res);
+	}//RequisitionValidateList
+
+	public function OrderBuyIndex()
+	{
+		try{
+			return view("Supplaying::order_buy", ['request' => $this->request, 'ru' => $this->ru]);				
 		} catch (\Exception $e) {
 			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 		}
@@ -332,15 +452,36 @@ class RequisitionController extends Controller {
 			$id 				= $this->request->input('order_id');
 			$pag 				= $this->request->input('page');
 			$filter_user 		= $this->request->input('filter_user');
+			$provider_list		= $this->request->input('provider_list');
+			$ban_email = false;
+			$msg = '';
+			
+			if( count($provider_list) > 0 ){
+				foreach ($provider_list as $kpl => $vpl) {
+					$validator = Validator::make(['email' => $vpl['email']], 
+												['email' => 'required|email']);
+					if ( !$validator->fails() ){
+						$ban_email = true;
+					} else {
+						$msg = 'Debe seleccionar un Proveedor con un Correo Electronico valido.';
+					}
+				}
+				if($ban_email == true){
+					$provider_list = json_encode($provider_list); 
 
-			DB::table('requisitions')
-					->where('id', '=', $id)
-					->update( ['finances_validate' => 1, ] );
+					DB::table('requisitions')
+							->where('id', '=', $id)
+							->update( ['finances_validate' => 1, 'provider_email' => $provider_list] );
 
-			$this->request->session()->put('order.id', $id);
-			$this->RequisitionListInterface($pag, $filter_user);
-			$this->res['status'] = true;
-
+					$this->request->session()->put('order.id', $id);
+					$this->RequisitionListInterface($pag, $filter_user);
+					$this->res['status'] = true;
+				} else {
+					$this->res['msg'] = $msg;
+				}
+			} else {
+				$this->res['msg'] = 'Seleccione un Contacto.';
+			}
 		} catch (\Exception $e) {
 			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 		}
@@ -371,11 +512,22 @@ class RequisitionController extends Controller {
 	 								->where('id', '=', $id)
 	 								->first();
 						if( count($t) == 1 ){
-								DB::table('requisitions')
+							DB::table('requisitions')
 	 								->where('id', '=', $id)
 	 								->update(array(
 	 										'ticket_pay_file' => $actual_image_name
 	 									));
+	 						/*$rq = DB::table('requisitions')
+	 									->where('id', '=', $id)
+	 									->first();
+
+							$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
+							$rq->provider_email 	= json_decode($rq->provider_email);
+
+							foreach ($rq->provider_email as $kpe => $vpe) {
+
+							}*/
+
 							$this->res['status'] = true;
 							$this->res['msg'] = 'Boucher de Requisición Subida Correctamente.';
 						}
@@ -392,25 +544,6 @@ class RequisitionController extends Controller {
 		echo json_encode($this->res);
 	}//OrderBuyFinancesUpload
 
-	public function OrderBuyFinalize()
-	{
-		try{
-			$id 				= $this->request->input('order_id');
-			$pag 				= $this->request->input('page');
-			$filter_user 		= $this->request->input('filter_user');
-
-			DB::table('requisitions')
-						->where('id', '=', $id)
-						->update(['final_order' => 1]);
-			$this->RequisitionListInterface($pag, $filter_user);
-			$this->res['status'] = true;
-			$this->res['msg'] = 'La Requisición se ha convertido a Orden de Compra.';
-		} catch (\Exception $e) {
-			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
-		}
-		return response()->json($this->res);
-	}//OrderBuyFinalize
-
 	public function OrderBuyList()
 	{
 		try{
@@ -420,36 +553,46 @@ class RequisitionController extends Controller {
 			$total_paginas = 0;
 			$offset = ($pag - 1) * $rowsPerPage;
 			
-			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
+			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) ){
 				$ob = DB::table('requisitions')
-							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
+							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'requisitions.pre_order', 'requisitions.finances_validate', 'requisitions.provider_email')
 							->join('groups', 'groups.id', '=', 'requisitions.group_id')
-							->where('final_order', '=', 1)
+							->where('requisitions.pre_order', '=', 1)
+							->where('requisitions.finances_validate', '=', 1)
 							->orderBy('requisitions.id', 'desc')
 							->skip($offset)
 							->take($rowsPerPage)
 							->get();
 				
 				$total_rows = DB::table('requisitions')
-							->where('final_order', '=', 1)
+							->where('pre_order', '=', 1)
+							->where('finances_validate', '=', 1)
 							->count();
 			} else {
 				$ob = DB::table('requisitions')
-							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
+							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'requisitions.pre_order', 'requisitions.finances_validate', 'requisitions.provider_email')
 							->join('groups', 'groups.id', '=', 'requisitions.group_id')
-							->where('final_order', '=', 1)
-							->where('user_id', '=', \Sentry::getUser()->id)
+							->where('requisitions.pre_order', '=', 1)
+							->where('requisitions.finances_validate', '=', 1)
+							->where('requisitions.user_id', '=', \Sentry::getUser()->id)
 							->orderBy('requisitions.id', 'desc')
 							->skip($offset)
 							->take($rowsPerPage)
 							->get();
 				
 				$total_rows = DB::table('requisitions')
-							->where('final_order', '=', 1)
+							->where('pre_order', '=', 1)
+							->where('finances_validate', '=', 1)
 							->where('user_id', '=', \Sentry::getUser()->id)
 							->count();
 			}
+			foreach ($ob as $ko => $vo) {
+				$vo->products 	= str_replace("'", '"', $vo->products);
+				$vo->products 	= json_decode($vo->products);
 
+				$vo->provider_email 	= str_replace("'", '"', $vo->provider_email);
+				$vo->provider_email 	= json_decode($vo->provider_email);
+			}
 			if( count($ob) > 0 ){
 				if($rowsPerPage <= $total_rows){
 					$total_paginas = 1;
@@ -468,5 +611,33 @@ class RequisitionController extends Controller {
 		}
 		return response()->json($this->res);
 	}//OrderBuyList
+
+	public function OrderBuyEmail()
+	{
+		try{
+			$user = \Sentry::getUser();
+			/*$rq = DB::table('requisitions')
+							->where('id', '=', 3)
+							->first();
+
+			$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
+			$rq->provider_email 	= json_decode($rq->provider_email);*/
+
+			/*foreach ($rq->provider_email AS $kpe => $vpe) {
+				Mail::send('emails.order_buy', ['user' => $user, 'vpe' => $vpe], function ($m) use ($vpe) {
+		            $m->from('samuel43_7@hotmail.com', 'Your Application');
+
+		            $m->to($vpe->email, $vpe->name)->subject('Your Reminder!');
+		        });
+			}*/
+				Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
+		            $m->from('samuel43_7@hotmail.com', 'Your Application');
+
+		            $m->to($user->email, $user->name)->subject('Your Reminder!');
+		        });
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+	}//OrderBuyEmail
 
 }//RequisitionController

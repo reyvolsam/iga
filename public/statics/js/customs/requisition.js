@@ -1,30 +1,9 @@
-angular.module('app', ['angularFileUpload'])
-	.controller('appCtrl', ['$http', 'FileUploader', '$scope', requisition_init]);
+angular.module('app', [])
+	.controller('appCtrl', ['$http', requisition_init]);
 
 
-function requisition_init($http, FileUploader, $scope){
+function requisition_init($http){
     var vm = this;
-
-    uploader = $scope.uploader = new FileUploader({
-        url: 'requisition/order_buy/finances/uploadticket',
-        removeAfterUpload: true
-    });
-    
-    uploader.onProgressItem = function(fileItem, progress) {
-        $('#submit_validate_pay_btn').html('Subiendo Baucher de Pago...');
-        $('#submit_validate_pay_btn').attr('disabled', 'disabled');
-        $('#progress_bar_file').css('width', progress+'%');
-    };
-
-    uploader.onCompleteAll = function( response, status, headers) {
-        $('#validate_pay_modal').modal('toggle');
-        $('#submit_validate_pay_btn').html('Guardar Producto');
-        $('#submit_validate_pay_btn').removeAttr('disabled');
-
-        $('#save_validate_pay_msg').html('');
-       	$('#progress_bar_file').css('width', '0%');
-        console.log(uploader.queue);
-    };
 
     $("[data-mask]").inputmask();
     vm.page = 1;
@@ -639,17 +618,32 @@ function requisition_init($http, FileUploader, $scope){
   	{
   		if(vm.requisition_list[vm.ind].pre_order == 0){
   			var n = prompt('Cambiar Número de Piezas', '');
-  			if( n.length != 0 || is_number(n) == true){
-				vm.requisition_list[vm.ind].products[ind].product_pieces = n;
-				vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
-				console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
-				CalculateTotal();
-				CalculateIVA();
+  			console.log(n.length);
+  			var msg = 'Introduza un Número Valido.';
+  			if( n.length != 0){
+  				if(is_number(n) == true){
+  					$('#edit_product_msg').html('');
+					vm.requisition_list[vm.ind].products[ind].product_pieces = n;
+					vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
+					console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
+					CalculateTotal();
+					CalculateIVA();
+  				} else {
+  					$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
+  				}
   			} else {
-  				alert('Introduza un Número Valido');
+  				$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
   			}
   		}
   	}//vm.EditProductPieces
+
+  	vm.DeleteProductPieces = function ($index)
+  	{
+  		var r = confirm('¿Desea Eliminar este Producto de la Requisición?');
+  		if(r == true){
+			vm.products_list.splice($index, 1);
+  		}
+  	}//vm.DeleteProductPieces
 
   	vm.CancelRequisition = function ()
   	{
@@ -706,13 +700,16 @@ function requisition_init($http, FileUploader, $scope){
 
   			$('#order_buy_date').attr('disabled', 'disabled');
   			$('#order_buy_pay_conditions').attr('disabled', 'disabled');
-  			$('#provider_id').attr('disabled', 'disabled');
+  			$('#order_buy_provider_id').attr('disabled', 'disabled');
 			$('#order_buy_deliver_place').attr('disabled', 'disabled');
 
 			$('#order_buy_new_place').attr('disabled', 'disabled');
 			$('#order_buy_observations').attr('disabled', 'disabled');
 			$('#submit_order_buy_btn').attr('disabled', 'disabled');
 			$('#submit_order_buy_btn').hide();
+			$('#modal_title_msg').html('Orden de Compra');
+			$('#save_order_buy_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Esta Orden de Compra esta a la espera de ser Validada por el Depto. de Finanzas.</div>');
+
   		} else {
 			vm.order_buy.date = null;
 			vm.order_buy.pay_conditions = null;
@@ -723,12 +720,14 @@ function requisition_init($http, FileUploader, $scope){
 			$('#order_buy_new_place').hide();
   			$('#order_buy_date').removeAttr('disabled');
   			$('#order_buy_pay_conditions').removeAttr('disabled');
-  			$('#provider_id').removeAttr('disabled');
+  			$('#order_buy_provider_id').removeAttr('disabled');
 			$('#order_buy_deliver_place').removeAttr('disabled');
 			$('#order_buy_new_place').removeAttr('disabled');
 			$('#order_buy_observations').removeAttr('disabled');
 			$('#submit_order_buy_btn').removeAttr('disabled');
 			$('#submit_order_buy_btn').show();
+			$('#modal_title_msg').html('Convertir a Orden de Compra');
+			$('#save_order_buy_msg').html('');
   		}
 		$('#convert_requisition_modal').modal('toggle');
   	}//vm.ConvertRequisition
@@ -807,67 +806,6 @@ function requisition_init($http, FileUploader, $scope){
         });
   	}//vm.ConvertRequisition
 
-  	vm.ValidatePayRequisition = function (ind)
-  	{
-  		vm.order_id = vm.requisition_list[ind].id;
-  		$('#validate_pay_modal').modal('toggle');
-  	}//vm.ValidatePayRequisition
-
-  	vm.SubmitValidatePayRequsition = function ()
-  	{
-        if(uploader.queue.length > 0){
-            if(uploader.queue.length == 1){
-                if(uploader.queue[0]._file.size < 5000000){
-                	SaveValidatePayRequisitionAjax();
-                } else {
-                	$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>El archivo debe de pesar menos de 5.00MB</div>');
-                }
-            } else {
-				$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Solo se puede seleeccionar un archivo.</div>');
-            }
-        } else {
-        	$('#save_validate_pay_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Seleccione un archivo</div>');
-        }
-  	}//vm.SubmitValidatePayRequsition()
-
-  	function SaveValidatePayRequisitionAjax()
-  	{
-        $('#submit_validate_pay_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
-        $('#submit_validate_pay_btn').attr('disabled', 'disabled');
-        $('#cancel_validate_pay_btn').attr('disabled', 'disabled');
-        $http.post('requisition/order_buy/finances/validate', { order_id: vm.order_id, page: vm.page, filter_user: vm.filter_user })
-            .success(function(res) {
-                console.log(res);
-                $('#submit_validate_pay_btn').html('Validar Pago de Requisición');
-                $('#submit_validate_pay_btn').removeAttr('disabled');
-                $('#save_validate_pay_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
-                if(res.status){
-					uploader.queue[0].upload();
-                	vm.requisition_list = res.data;
-                	RenderPage(res.tp);
-                } else {
-					$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
-                }
-        }).error(function (res){
-			$('#submit_validate_pay_btn').html('Validar Pago de Requisición');
-			$('#submit_validate_pay_btn').removeAttr('disabled');
-			$('#cancel_validate_pay_btn').removeAttr('disabled');
-            console.log(res);
-        });
-  	}//SaveValidatePayRequisitionAjax
-
-  	vm.CancelValidatePay = function ()
-  	{
-
-  	}//vm.CancelValidatePay()
-
-  	vm.ViewPayTicket = function (ind)
-  	{
-  		vm.order_id = vm.requisition_list[ind].id;
-  		$('#view_pay').attr('src', '../order_buy_ticket/'+vm.requisition_list[ind].ticket_pay_file);
-
-  		$('#view_pay_modal').modal('toggle');
-  	}//vm.ViewPayTicket
 
   	vm.FinalizeOrderBuy = function ()
   	{

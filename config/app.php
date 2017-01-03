@@ -147,7 +147,8 @@ return [
 
         ArtemSchander\L5Modular\ModuleServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
-        'Cartalyst\Sentry\SentryServiceProvider'
+        'Cartalyst\Sentry\SentryServiceProvider',
+        Barryvdh\DomPDF\ServiceProvider::class,
     ],
 
     /*
@@ -198,7 +199,8 @@ return [
 
         'Form' => Collective\Html\FormFacade::class,
         'HTML' => Collective\Html\HtmlFacade::class,
-        'Sentry'    => 'Cartalyst\Sentry\Facades\Laravel\Sentry'
+        'Sentry'    => 'Cartalyst\Sentry\Facades\Laravel\Sentry',
+        'PDF' => Barryvdh\DomPDF\Facade::class,
     ],
 
 ];

@@ -41,15 +41,19 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 	Route::post('supplaying/requisition/save', 'RequisitionController@RequisitionSave');
 	Route::post('supplaying/requisition/list', 'RequisitionController@RequisitionList');
 	Route::post('supplaying/requisition/delete', 'RequisitionController@RequisitionDelete');
+	Route::get('supplaying/requisition/pdf/{id}', 'RequisitionController@RequisitionPDF');
+	
+	Route::get('supplaying/requisition/validate', 'RequisitionController@RequisitionValidateIndex');
+	Route::post('supplaying/requisition/validate/list', 'RequisitionController@RequisitionValidateList');
+
 	Route::post('supplaying/requisition/order_buy/providers', 'RequisitionController@OrderBuyProviders');
 	Route::post('supplaying/requisition/order_buy/save', 'RequisitionController@OrderBuySave');
 	Route::post('supplaying/requisition/order_buy/finances/validate', 'RequisitionController@OrderBuyFinancesValidate');
 	Route::post('supplaying/requisition/order_buy/finances/uploadticket', 'RequisitionController@OrderBuyFinancesUpload');
-	Route::post('supplaying/requisition/order_buy/finalize', 'RequisitionController@OrderBuyFinalize');
-	
 
 	Route::get('supplaying/order_buy', 'RequisitionController@OrderBuyIndex');
 	Route::post('supplaying/order_buy/list', 'RequisitionController@OrderBuyList');
+	Route::get('supplaying/order_buy/email', 'RequisitionController@OrderBuyEmail');
 
 	
 	//Route::post('supplaying/order_buy/save', 'RequisitionController@OrderBuySave');

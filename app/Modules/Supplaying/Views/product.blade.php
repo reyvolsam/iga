@@ -55,7 +55,7 @@
 				<th>Acciones</th>
 			</tr>
 		</thead>
-		<tbody ng-repeat="elem in vm.product_list">
+		<tbody ng-repeat="elem in vm.product_list" ng-init = "cont = $index">
 			<tr>
 				<td>#@{{elem.code}}</td>
 				<td>@{{elem.name}}</td>
@@ -63,7 +63,10 @@
 				<td>@{{elem.max}}</td>
 				<td>@{{elem.min}}</td>
 				<td>@{{elem.unit}}</td>
-				<td>  </td>
+				<td> 
+					<button class = "btn btn-info btn-xs" ng-click = "vm.EditProduct($index)" ><i class = "fa fa-edit"></i></button>  
+					<button class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProduct($index)" ><i class = "fa fa-trash"></i></button>  
+				</td>
 			</tr>
 		</tbody>
 	</table>
@@ -146,7 +149,11 @@
 								<input  nv-file-select = "" uploader="uploader" class = "form-control" type = "file" id = "technical_file" name = "technical_file" size="1" /> 
 							</div><!--/wrapper-->
 						</div><!--/form-group-->
-					</div>
+					</div><!--/file-field-->
+					<div id = "technical_file_raw_material_div">
+						<a href="#" target = "_blank" class = "label label-info" id = "product_technical_file"><i class = "fa fa-download"></i> Descargar Ficha Tecnica</a>
+					</div><!--/technical_file_div_raw_material-->
+					<br />
 					<table class = "table table-bordered table-striped">
 						<thead>
 							<th>Nombre del Archivo</th>
@@ -204,7 +211,7 @@
                     	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
                   	</div><!---/progress-->
 					<div class="modal-footer">			
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
 						<button type = "submit" class = "btn btn-success" id = "save_product_btn">Guardar Producto</button>
 					</div><!--/footer-->
 				</div><!--/modal-body-->

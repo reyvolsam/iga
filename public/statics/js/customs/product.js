@@ -23,6 +23,8 @@ function products_init($http, FileUploader, $scope){
 
 	$('#select_provider').hide();
 
+    $('#technical_file_raw_material_div').hide();
+
     if(vm.product.type == 'semifinished_product'){
         vm.product.provider_name = 'PLASTICOS DEL GOLFO SUR S.A DE C.V';
         vm.product.provider_id = 26;
@@ -132,6 +134,7 @@ function products_init($http, FileUploader, $scope){
     function AjaxSaveProduct()
     {
         console.log(vm.product);
+        vm.product.page = vm.page;
         $http.post('save', vm.product)
             .success(function(res) {
                 console.log(res);
@@ -282,5 +285,16 @@ function products_init($http, FileUploader, $scope){
             });
         }
     }//PageRender
+
+    vm.EditProduct = function (ind)
+    {
+        if(vm.product.type = 'raw_material'){
+            console.log(vm.product_list[ind]);
+            $('#technical_file_raw_material_div').show();
+            $('#product_technical_file').attr('href', vm.product_list[ind].technical_file);
+
+            $('#raw_material_modal').modal('toggle');
+        }
+    }//vm.EditProduct
 
 }//products_init

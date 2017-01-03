@@ -12,7 +12,6 @@
 @section('js')
   	{!! HTML::script('statics/js/lib/jquery.inputmask.js') !!}
   	{!! HTML::script('statics/js/lib/jquery.inputmask.date.extensions.js') !!}
-  	{!! HTML::script('statics/js/lib/angular-file-upload.min.js') !!}
   	{!! HTML::script('statics/js/customs/requisition.js') !!}
 @stop
 
@@ -29,7 +28,7 @@
 	<div class="box-body" ng-init = "vm.RequisitionList();">		
   		<div id = "requisition_list_msg"></div><!--/order_produciton_msg-->
   		<div class = "col-md-12">
-  			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) )
+  			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
   			<div class = "col-md-4">
   				<label>Filtrar por Departamento</label><br />
   					<select class = "form-control pull-left" id = "filter_user" name = "filter_user" ng-model = "vm.filter_user" ng-change = "vm.ChangeFilterUser();"> 
@@ -52,6 +51,7 @@
   				<th>Departamento</th>
   				<th>Fecha Solicitada</th>
   				<th>Fecha Requerida</th>
+  				<th>Dias de Vencimiento</th>
   				<th>Total Requisitado</th>
   				<th>Uso</th>
   				<th>Acciones</th>
@@ -62,6 +62,7 @@
   					<td>@{{ elem.group_name }}</td>
   					<td>@{{ elem.requested_date }}</td>
   					<td>@{{ elem.required_date }}</td>
+  					<td>@{{ elem.left_days }}</td>
   					<td>@{{ elem.total | currency }}</td>
   					<td>@{{ elem.use }}</td>
   					<td>
@@ -71,13 +72,14 @@
   						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequisition($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button>
   						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-danger btn-xs" disabled="disabled"><i class = "fa fa-trash"></i></button>
   						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
-  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Convertir a Orden de Compra"><i class = "fa fa-check"></i></button> 
+  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Convertir a Orden de Compra"><i class = "fa fa-check"></i></button>
   						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> 
+  						<a href = "{{ URL::to('supplaying/requisition/pdf') }}/@{{elem.id}}" ng-if = "elem.pre_order == 1" title ="Descargar" class = "download btn btn-default btn-xs"  data-toggle="tooltip" data-placement = "top" title = "Descargar PDF"><i class="fa fa-cloud-download"></i></a>
   						@endif
-  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
+  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
   						<!--<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> -->
-  						<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 0" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ValidatePayRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Validar Pago de Requisición"><i class = "fa fa-check"></i></button> 
-  						<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 1" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ViewPayTicket($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Boucher de Pago"><i class = "fa fa-money"></i></button> 
+  						<!--<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 0" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ValidatePayRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Validar Pago de Requisición"><i class = "fa fa-check"></i></button> -->
+  						<!--<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 1" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ViewPayTicket($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Boucher de Pago"><i class = "fa fa-money"></i></button> -->
   						@endif
   					</td>
   				</tr>
@@ -268,10 +270,14 @@
 								<td>@{{ elem.money_type }}</td>
 								<td>@{{ elem.pesos_price | currency }}</td>
 								<td>@{{ elem.importe | currency }}</td>
-								<td><button type = "button" class = "btn_edit_pieces btn btn-default btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button></td>
+								<td>
+								<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button> 
+								<button type = "button" class = "btn_delete_pieces btn btn-danger btn-xs" ng-click = "vm.DeleteProductPieces($index);"><i class = "fa fa-trash"></i></button>
+								</td>
 							</tr>
 						</tbody>
 					</table>
+					<div id = "edit_product_msg"></div><!--/edit_product_msg-->
 					<br />
 					<div class="col-md-4">
 						<label for = "sub_total" class = "control-label">Sub-Total</label>
@@ -333,7 +339,7 @@
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h4 class="modal-title">Convertir a Orden Compra</h4>
+				<h4 class="modal-title" id = "modal_title_msg">Convertir a Orden Compra</h4>
 			</div>
 			<form method = "post" ng-submit = "vm.SubmitConvertRequisition();">
 				<div class="modal-body">
@@ -433,79 +439,5 @@
 		</div><!--/modal-content-->
 	</div><!--/modal-dialog-->
 </div><!--/modal-->
-
-@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
-<div class="modal fade" id = "validate_pay_modal" tabindex = "-1" role="dialog" aria-labelledby="validate_pay_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title">Validar Pago</h4>
-			</div>
-			<form method = "post" ng-submit = "vm.SubmitValidatePayRequsition();">
-				<div class="modal-body">
-
-					<div class="col-lg-6">
-						<div class="file-field input-field">
-							<div class="form-group">
-								<label for = "ticket_file" class="control-label">Baucher de Pago</label>
-								<div id = "wrapper"> 
-									<input  nv-file-select = "" uploader="uploader" class = "form-control" type = "file" id = "ticket_file" name = "ticket_file" size="1" multiple/> 
-								</div><!--/wrapper-->
-							</div><!--/form-group-->
-						</div><!--/file-field-->
-					</div><!--/col-lg-6-->
-
-					<table class = "table table-bordered table-striped">
-						<thead>
-							<th>Nombre del Archivo</th>
-							<th>Tamaño</th>
-							<th>Acción</th>
-						</thead>
-						<tbody ng-repeat="item in uploader.queue">
-							<tr>
-								<td><strong>@{{ item.file.name }}</strong></td>
-								<td> @{{ item.file.size/1024/1024|number:2 }} MB </td>
-								<td><button type="button" class="btn btn-danger btn-xs" ng-click="item.remove()"><span class="glyphicon glyphicon-trash"></span></button></td>
-							</tr>
-						</tbody>
-					</table>
-
-                  	<div class="progress xs">
-                    	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
-                  	</div><!---/progress-->
-
-				</div><!--/modal-body-->
-				<div id = "save_validate_pay_msg"></div><!-- requisition_list_msg-->
-				<div class = "clearfix"></div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" ng-click = "vm.CancelValidatePay();" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
-					<button type = "submit" class = "btn btn-success" id = "submit_validate_pay_btn">Validar Pago de Requisición</button>
-				</div>
-			</form>
-		</div><!--/modal-content-->
-	</div><!--/modal-dialog-->
-</div><!--/modal-->
-@endif
-
-@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
-<div class="modal fade" id = "view_pay_modal" tabindex = "-1" role="dialog" aria-labelledby="view_pay_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title">Ver Boucher de Pago</h4>
-			</div>
-			<div class="modal-body">
-			<img src = "#" id = "view_pay" name = "view_pay" width="400" height="250" />
-			</div><!--/modal-body-->
-			<div id = "view_pay_msg"></div><!-- requisition_list_msg-->
-			<div class = "clearfix"></div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" id = "cancel_order_buy_view_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
-				<button type="button" class="btn btn-success" id = "finalize_order_buy_btn" ng-click = "vm.FinalizeOrderBuy();" data-dismiss="modal" aria-hidden="true">Finalizar Orden de Compra</button>
-			</div>
-		</div><!--/modal-content-->
-	</div><!--/modal-dialog-->
-</div><!--/modal-->
-@endif
 
 @stop
