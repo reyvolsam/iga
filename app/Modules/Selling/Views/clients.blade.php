@@ -543,16 +543,16 @@
 									<label>&nbsp;</label><br />
 										<button type ="button" ng-click = "vm.CopyFromFiscal();" class="btn btn-default"><i class="fa fa-copy"></i>&nbsp;  Copiar Direccion Fiscal</button>
 									</div><!--/col-md-3-->
-									<form>
+									
 										<div class = "col-md-3">
 											<label for = "cp_check">Codigo Postal</label>
 											<input type = "text" class = "form-control" name = "cp_check" id = "cp_check" ng-model = "vm.pc" placeholder = "Codigo Postal" />
 										</div><!--/col-md-3-->
 										<div class = "col-md-3">
 											<label>&nbsp;</label><br />
-											<button type = "submit" id = "btn_check_pc" ng-click = "vm.CheckPC();" class="btn btn-default">Comprobar Codigo Postal</button>
+											<button type = "button" id = "btn_check_pc" ng-click = "vm.CheckPC();" class="btn btn-default">Comprobar Codigo Postal</button>
 										</div><!--/col-md-3-->
-									</form>
+								
 								</div><!--/col-md-12-->
 								<br />
 								<br />

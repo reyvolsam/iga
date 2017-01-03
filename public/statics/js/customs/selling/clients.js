@@ -43,6 +43,7 @@ function clients_init($http){
 
     vm.SubmitCreateClient = function ()
     {
+        console.log('res');
         $('#submit_client_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
         $('#submit_client_btn').attr('disabled', 'disabled');
         $('#cancel_client_btn').attr('disabled', 'disabled');
