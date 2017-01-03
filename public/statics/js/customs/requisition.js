@@ -314,17 +314,9 @@ function requisition_init($http){
 				console.log('primer r');
 				return false;
 			} else {
-				if( vm.product.new.unit == 'Other' ){
-					if( typeof(vm.product.new.new_unit) === "undefined" || vm.product.new.new_unit == 0  ){
-						console.log('segundo r');
-						return false;
-					} else {
-						console.log('primer t');
-						return true;
-					}
-				}
-				//return true;
+				return true;
 			}
+			
 		} else if(vm.requisition.product_type == 'no_catalog'){
 			if( vm.product.new.name == null
 					|| vm.product.new.unit == null
