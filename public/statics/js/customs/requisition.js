@@ -36,6 +36,9 @@ function requisition_init($http){
 	vm.order_buy_list = Array();
 	vm.providers_list_select = {};
 
+	vm.notification = '';
+	vm.notification_list = Array();
+
 	function Finances_Init()
 	{
 		vm.finances = {};
@@ -87,6 +90,7 @@ function requisition_init($http){
 	{
 		vm.requisition_list = {};
 		$('#requisition_list_loader').show();
+		$('#requisition_list_msg').html('');
         $http.post('requisition/list', { page: vm.page, filter_user: vm.filter_user })
             .success(function(res) {
             	console.log(res);
@@ -152,6 +156,8 @@ function requisition_init($http){
                 	Finances_Init();
 					vm.products_list = Array();
 					vm.product_list_select = {};
+					vm.notification_list = Array();
+					$('#notification_msg').html('');
                 	vm.requisition_list = res.data;
                 	RenderPage(res.tp);
                 	$('#requisition_list_msg').html('');
@@ -187,6 +193,7 @@ function requisition_init($http){
 		} else if(vm.requisition.product_type == 'no_catalog'){
 			$('#new_product_div').show();
 			$('#catalog_product_div').hide();
+			$('#product_msg').html('');
 		} else {
 			$('#catalog_product_div').hide();
 			$('#new_product_div').hide();
@@ -597,6 +604,9 @@ function requisition_init($http){
 
 		vm.requisition.use = vm.requisition_list[ind].use;
 		vm.requisition.observations = vm.requisition_list[ind].observations;
+
+		vm.notification_list = vm.requisition_list[ind].notifications;
+		console.log(vm.notification_list);
 		if(vm.requisition_list[ind].pre_order == 1){
 			$('#required_date').attr('disabled', 'disabled');
 			$('#iva').attr('disabled', 'disabled');
@@ -650,9 +660,11 @@ function requisition_init($http){
 
   	vm.DeleteProductPieces = function ($index)
   	{
-  		var r = confirm('¿Desea Eliminar este Producto de la Requisición?');
-  		if(r == true){
-			vm.products_list.splice($index, 1);
+  		if(vm.requisition_list[vm.ind].pre_order == 0){
+	  		var r = confirm('¿Desea Eliminar este Producto de la Requisición?');
+	  		if(r == true){
+				vm.products_list.splice($index, 1);
+	  		}
   		}
   	}//vm.DeleteProductPieces
 
@@ -843,5 +855,86 @@ function requisition_init($http){
 	        });
   		}
   	}//vm.FinalizeOrderBuy
+
+  	vm.SaveNotification = function ()
+  	{
+  		console.log(vm.notification_list);
+		$('#save_notification_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
+		$('#save_notification_btn').attr('disabled', 'disabled');
+		if(vm.notification_list != null){
+			var aux = {
+				notification: vm.notification,
+				seen: 0
+			};
+		} else {
+			vm.notification_list = Array();
+			var aux = {
+				notification: vm.notification,
+				seen: 0
+			};
+		}
+		vm.notification_list.unshift(aux);
+        $http.post('requisition/notification/save', { notifications: vm.notification_list, id: vm.requisition.id })
+            .success(function(res) {
+                console.log(res);
+                $('#save_notification_btn').html('Agregar Notificación');
+                $('#save_notification_btn').removeAttr('disabled');
+                if(res.status){
+                	vm.notification_list = res.data;
+                	vm.notification = '';
+                } else {
+					$('#notification_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+			$('#save_notification_btn').html('Agregar Notificación');
+			$('#save_notification_btn').removeAttr('disabled');
+            console.log(res);
+        });
+  	}//vm.AddNotification()
+
+  	vm.DeleteNotification = function (ind)
+  	{
+		$('#deln_'+ind).html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
+		$('#deln_'+ind).attr('disabled', 'disabled');
+		vm.notification_list.splice(ind, 1);
+
+        $http.post('requisition/notification/save', { notifications: vm.notification_list, id: vm.requisition.id })
+            .success(function(res) {
+                console.log(res);
+                $('#deln_'+ind).html('<span aria-hidden="true">&times;</span>');
+                $('#deln_'+ind).removeAttr('disabled');
+                if(res.status){
+                	vm.notification_list = res.data;
+                	vm.notification = '';
+                } else {
+					$('#notification_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+			$('#deln_'+ind).html('<span aria-hidden="true">&times;</span>');
+			$('#deln_'+ind).removeAttr('disabled');
+            console.log(res);
+        });
+  	}//vm.DeleteNotification
+
+  	vm.UpdateNotification = function (ind)
+  	{
+  		vm.notification_list[ind].seen = 1;
+        $http.post('requisition/notification/save', { notifications: vm.notification_list, id: vm.requisition.id })
+            .success(function(res) {
+                console.log(res);
+                $('#deln_'+ind).html('<span aria-hidden="true">&times;</span>');
+                $('#deln_'+ind).removeAttr('disabled');
+                if(res.status){
+                	vm.notification_list = res.data;
+                	vm.notification = '';
+                } else {
+					$('#notification_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                }
+        }).error(function (res){
+			$('#deln_'+ind).html('<span aria-hidden="true">&times;</span>');
+			$('#deln_'+ind).removeAttr('disabled');
+            console.log(res);
+        });
+  	}//vm.UpdateNotification
 
 }//index_init

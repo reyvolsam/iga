@@ -12,24 +12,29 @@ function order_buy_init($http){
 
     vm.provier_emails = {};
 
-    vm.OrdersBuyList = function ()
+    function OrdersBuyList()
     {
-		vm.orders_buy_list = {};
-		$('#orders_buy_list_loader').show();
+        vm.orders_buy_list = {};
+        $('#orders_buy_list_loader').show();
         $http.post('order_buy/list', { page: vm.page })
             .success(function(res) {
-            	console.log(res);
-            	$('#orders_buy_list_loader').hide();
+                console.log(res);
+                $('#orders_buy_list_loader').hide();
                 if(res.status){
-                	vm.orders_buy_list = res.data;
-                	RenderPage(res.tp);
+                    vm.orders_buy_list = res.data;
+                    RenderPage(res.tp);
                 } else {
-                	$('#orders_buy_list_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');	
+                    $('#orders_buy_list_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');  
                 }
         }).error(function (res){
-        	$('#orders_buy_list_loader').hide();
+            $('#orders_buy_list_loader').hide();
             console.log(res);
         });
+    }//OrderBuyList
+
+    vm.OrdersBuyList = function ()
+    {
+        OrdersBuyList();
     }//vm.OrdersBuyList()
 
     function RenderPage(tp)
@@ -48,7 +53,7 @@ function order_buy_init($http){
             $('.item_paginador').on('click', function (e){
                 e.preventDefault();
                 vm.page = $(this).text();
-                RequisitionList();
+                OrdersBuyList();
             });
         }
     }//PageRender
@@ -76,6 +81,11 @@ function order_buy_init($http){
         } else{
             $('#order_buy_new_place').hide();
         }
+
+        vm.order_buy.subtotal               = vm.orders_buy_list[ind].subtotal;
+        vm.order_buy.iva                    = vm.orders_buy_list[ind].iva;
+        vm.order_buy.total                  = vm.orders_buy_list[ind].total;
+        
         vm.order_buy.new_place              = vm.orders_buy_list[ind].new_place;
         vm.order_buy.order_observations     = vm.orders_buy_list[ind].order_observations;
 

@@ -54,6 +54,7 @@
   				<th>Dias de Vencimiento</th>
   				<th>Total Requisitado</th>
   				<th>Uso</th>
+  				<th>Estado</th>
   				<th>Acciones</th>
   			</thead>
   			<tbody ng-repeat = "elem in vm.requisition_list" ng-init = "cont = $index">
@@ -62,25 +63,22 @@
   					<td>@{{ elem.group_name }}</td>
   					<td>@{{ elem.requested_date }}</td>
   					<td>@{{ elem.required_date }}</td>
-  					<td>@{{ elem.left_days }}</td>
+  					<td ng-if = "elem.left_days <= 0" class="danger">@{{ elem.left_days }}</td>
+  					<td ng-if = "elem.left_days > 0">@{{ elem.left_days }}</td>
   					<td>@{{ elem.total | currency }}</td>
   					<td>@{{ elem.use }}</td>
   					<td>
-  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Ver Requisición"><i class = "fa fa-eye"></i></button> 
-  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Editar Requisición"><i class = "fa fa-edit"></i></button> 
-  						
-  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequisition($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button>
-  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-danger btn-xs" disabled="disabled"><i class = "fa fa-trash"></i></button>
-  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
-  						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Convertir a Orden de Compra"><i class = "fa fa-check"></i></button>
-  						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> 
-  						<a href = "{{ URL::to('supplaying/requisition/pdf') }}/@{{elem.id}}" ng-if = "elem.pre_order == 1" title ="Descargar" class = "download btn btn-default btn-xs"  data-toggle="tooltip" data-placement = "top" title = "Descargar PDF"><i class="fa fa-cloud-download"></i></a>
-  						@endif
-  						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('finance') ) ) 
-  						<!--<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button> -->
-  						<!--<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 0" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ValidatePayRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Validar Pago de Requisición"><i class = "fa fa-check"></i></button> -->
-  						<!--<button ng-if = "elem.pre_order == 1  && elem.finances_validate == 1" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ViewPayTicket($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Boucher de Pago"><i class = "fa fa-money"></i></button> -->
-  						@endif
+  						<span ng-if = "elem.pre_order == 0" class="label label-default">En espera de Validación...</span>
+  						<span ng-if = "elem.pre_order == 1" class="label label-primary">En espera de Orden de Compra...</span>
+  					</td>
+  					<td>
+						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Editar Requisición"><i class = "fa fa-edit"></i></button> 
+						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequisition($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button>
+						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Ver Requisición"><i class = "fa fa-eye"></i></button> 
+						<a href = "{{ URL::to('supplaying/requisition/pdf') }}/@{{elem.id}}" ng-if = "elem.pre_order == 1" title ="Descargar" class = "download btn btn-default btn-xs"  data-toggle="tooltip" data-placement = "top" title = "Descargar PDF"><i class="fa fa-cloud-download"></i></a>
+						@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
+							<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-success btn-xs" ng-click = "vm.ConvertRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Convertir a Orden de Compra"><i class = "fa fa-check"></i></button>
+						@endif
   					</td>
   				</tr>
   			</tbody>
@@ -323,14 +321,63 @@
 							</div><!--/col-lg-10-->
 						</div><!--/form-group-->
 					</div><!-- termina row -->
-
 				</div><!--/modal-body-->
 				<div id = "save_requisition_msg"></div><!-- requisition_list_msg-->
 				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" id = "cancel_requistion_btn" data-dismiss="modal" aria-hidden="true" ng-click = "vm.CancelRequisition();">Cancelar</button>
+					<button type="button" class="btn btn-danger" id = "cancel_requistion_btn" data-dismiss="modal" aria-hidden="true" ng-click = "vm.CancelRequisition();">Cerrar</button>
 					<button type = "submit" class = "btn btn-success" id = "submit_requisition_btn">Guardar Requisición</button>
-				</div>
+				</div><!--/modal-footer-->
 			</form>
+			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
+			<br />
+			<br />
+			<div class="modal-body">
+				<div class="panel panel-default">
+					<div class="panel-heading">Notificaciones</div>
+					 <div class="panel-body">
+					 	<div class = "form-group">
+					 		<label for = "user_notification">Contenido de Notifiación</label>
+					 		<textarea class = "form-control" id = "user_notification" ng-model = "vm.notification" name = "user_notification"></textarea>
+					 	</div><!--/form-group-->
+					 	<div id = "notification_msg"></div><!--/notification_msg-->
+					 	<button class = "btn btn-success pull-right" id = "save_notification_btn" ng-click = "vm.SaveNotification();">Agregar Notificación</button>	
+						<div class = "clearfix"></div><!--/clearfix-->
+						<br />
+						<div class="list-group">
+							<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
+								<a href="#" class="list-group-item active" ng-if = "elem.seen == 0">
+									<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);" id = "deln_@{{$index}}"><span aria-hidden="true">&times;</span></button>
+							    	@{{ elem.notification }}
+							  	</a>
+								<a href="#" class="list-group-item" ng-if = "elem.seen == 1">
+									<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);"><span aria-hidden="true">&times;</span></button>
+							    	@{{ elem.notification }}
+							  	</a>
+							</div>
+						</div><!--/list-group-->
+					</div><!--/panel-body-->
+				</div><!--/panel-->
+			</div><!--/modal-body-->
+			@else
+			<div class="modal-body">
+				<div id = "notification_msg"></div><!--/notification_msg-->
+				<div class="panel panel-default">
+					<div class="panel-heading">Notificaciones</div>
+					 <div class="panel-body">
+						<div class="list-group">
+							<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
+								<a href="" class="list-group-item active" ng-if = "elem.seen == 0" ng-click = "vm.UpdateNotification($index);">
+							    	@{{ elem.notification }}
+							  	</a>
+								<a href="" class="list-group-item" ng-if = "elem.seen == 1">
+							    	@{{ elem.notification }}
+							  	</a>
+							</div>
+						</div><!--/list-group-->
+					</div><!--/panel-body-->
+				</div><!--/panel-->
+			</div><!--/modal-body-->
+			@endif
 		</div><!--/modal-content-->		
 	</div><!--/modal-dialog-->
 </div><!--/modal-->
@@ -432,7 +479,7 @@
 				</div><!--/modal-body-->
 				<div id = "save_order_buy_msg"></div><!-- requisition_list_msg-->
 				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" ng-click = "vm.CancelOrderBuy();" id = "cancel_order_buy_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type="button" class="btn btn-danger" ng-click = "vm.CancelOrderBuy();" id = "cancel_order_buy_btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
 					<button type = "submit" class = "btn btn-success" id = "submit_order_buy_btn">Convertir a Orden de Compra</button>
 				</div>
 			</form>

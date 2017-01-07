@@ -151,6 +151,32 @@
           <br />
           <br />
           <br />
+          <div class="col-md-4">
+            <label for = "sub_total" class = "control-label">Sub-Total</label>
+            <div class="input-group">
+              <div class="input-group-addon">$</div>
+                <input type = "text" class = "form-control" id = "sub_total" name = "sub_total" ng-model = "vm.order_buy.subtotal" placeholder = "Sub-Total" readonly />
+              </div><!--/input-group-addon-->
+          </div><!--/col-md-4-->
+          <div class="col-md-4">
+            <label for = "iva" class = "control-label">IVA</label>
+            <div class="input-group">
+              <input type = "text" class = "form-control" id = "iva" name = "iva" ng-model = "vm.order_buy.iva" ng-change = "vm.ChangeIVA();" placeholder = "IVA" readonly />
+              <div class="input-group-addon">%</div>
+            </div><!--/input-group-->
+          </div><!--/col-md-4-->
+          <div class="col-md-4">
+            <label for = "total" class = "control-label">Total</label>
+            <div class="input-group">
+              <div class="input-group-addon">$</div>
+              <input type = "text" class = "form-control" id = "total" name = "total" ng-model = "vm.order_buy.total" placeholder = "Total" readonly />
+            </div><!--/input-group-->
+          </div><!--/col-md-4-->
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
           <div class = "row">
             <div class="form-group">
               <label for = "order_buy_deliver_place" class = "col-lg-3 control-label">Entregar en:</label>

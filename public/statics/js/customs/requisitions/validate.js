@@ -13,7 +13,7 @@ function requisition_validate_init($http, FileUploader, $scope){
     vm.order_buy.providers_selected = {};
 
     uploader = $scope.uploader = new FileUploader({
-        url: 'requisition/order_buy/finances/uploadticket',
+        url: 'order_buy/finances/uploadticket',
         removeAfterUpload: true
     });
     
@@ -30,6 +30,7 @@ function requisition_validate_init($http, FileUploader, $scope){
 
         $('#save_validate_pay_msg').html('');
        	$('#progress_bar_file').css('width', '0%');
+        RequisitionList();
         console.log(uploader.queue);
     };
 
@@ -163,6 +164,10 @@ function requisition_validate_init($http, FileUploader, $scope){
         } else{
             $('#order_buy_new_place').hide();
         }
+        vm.order_buy.subtotal               = vm.requisition_list[ind].subtotal;
+        vm.order_buy.iva                    = vm.requisition_list[ind].iva;
+        vm.order_buy.total                  = vm.requisition_list[ind].total;
+
         vm.order_buy.new_place              = vm.requisition_list[ind].new_place;
         vm.order_buy.order_observations     = vm.requisition_list[ind].order_observations;
 

@@ -109,6 +109,7 @@ class RequisitionController extends Controller {
 			$data['final_order'] 		= 0;
 			$data['finances_validate'] 	= 0;
 			$data['pre_order'] 			= 0;
+			$data['notifications'] 		= '[]';
 
 			$validator = Validator::make($data, [
     			'requested_date' 		=> 'required',
@@ -136,13 +137,20 @@ class RequisitionController extends Controller {
 						$this->RequisitionListInterface($pag, $filter_user);
 						$this->res['msg'] = 'Requisición Guardada Correctamente';
 					} else {
-						$data['updated_at'] = date('Y-m-d H:i:s');
-						DB::table('requisitions')
+							$rqe = DB::table('requisitions')
 								->where('id', '=', $data['id'])
-								->update($data);
-						$this->res['status'] = true;
-						$this->RequirementListInterface($pag, $filter_user);
-						$this->res['msg'] = 'Requisición Actualizada Correctamente';
+								->first();
+						if($rqe){
+							$data['updated_at'] = date('Y-m-d H:i:s');
+							DB::table('requisitions')
+									->where('id', '=', $data['id'])
+									->update($data);
+							$this->res['status'] = true;
+							$this->RequisitionListInterface($pag, $filter_user);
+							$this->res['msg'] = 'Requisición Actualizada Correctamente';
+						} else {
+							$this->res['msg'] = 'Esta Requisición ya no existe, recarge la pagina.';
+						}
 					}
 				} else {
 					$this->res['msg'] = 'Introduzca por lo menos, un Producto la Requisición.';
@@ -165,7 +173,7 @@ class RequisitionController extends Controller {
 			$offset = ($pag - 1) * $rowsPerPage;
 			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
 				$q = DB::table('requisitions')
-							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
+							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'requisitions.notifications')
 							->join('groups', 'groups.id', '=', 'requisitions.group_id');
 				
 				$q2 = DB::table('requisitions');
@@ -175,8 +183,7 @@ class RequisitionController extends Controller {
 					$q2 = $q2->where('group_id', '=', $filter_user);
 				}
 
-				$cl = $q->where('pre_order', '=', 0)
-						->where('finances_validate', '=', 0)
+				$cl = $q->where('finances_validate', '!=', 1)
 						->orderBy('requisitions.id', 'desc')
 						->skip($offset)
 						->take($rowsPerPage)
@@ -187,29 +194,34 @@ class RequisitionController extends Controller {
 				$msg = 'No hay Requisiciones hasta el momento.';
 			} else {
 				$cl = DB::table('requisitions')
-						->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file')
+						->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'requisitions.notifications')
 						->join('groups', 'groups.id', '=', 'requisitions.group_id')
 						->where('requisitions.user_id', '=', \Sentry::getUser()->id)
-						->where('pre_order', '=', 0)
-						->where('finances_validate', '=', 0)
+						->where('finances_validate', '!=', 1)
 						->orderBy('requisitions.id', 'desc')
 						->skip($offset)
 						->take($rowsPerPage)
 						->get();
 				$total_rows = DB::table('requisitions')
 									->where('user_id', '=', \Sentry::getUser()->id)
-									->where('pre_order', '=', 0)
-									->where('finances_validate', '=', 0)
 									->count();
 				$msg = 'No hay Requisiciones hasta el momento.';
 			}
 			foreach ($cl as $kc => $vc) {
 				$vc->products 	= str_replace("'", '"', $vc->products);
 				$vc->products 	= json_decode($vc->products);
+
+				$vc->notifications 	= str_replace("'", '"', $vc->notifications);
+				$vc->notifications 	= json_decode($vc->notifications);
+
 				$datetime1 = new DateTime(Date('Y-m-d H:i:s'));
 				$datetime2 = new DateTime($vc->required_date);
 				$interval = $datetime1->diff($datetime2);
 				$vc->left_days = $interval->format('%R%a');
+				$r = str_split($vc->left_days);
+				if($r[0] == '+'){
+					$vc->left_days = $r[1];
+				}
 			}
 			if( count($cl) > 0 ){
 				if($rowsPerPage <= $total_rows){
@@ -640,5 +652,68 @@ class RequisitionController extends Controller {
 			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 		}
 	}//OrderBuyEmail
+
+	public function RequisitionNotificationSave()
+	{
+		try{
+			$data = array();
+
+			$notifications 			= $this->request->input('notifications');
+			$id 					= $this->request->input('id');
+
+			$notifications = json_encode($notifications); 
+
+			$data['notifications'] = $notifications;
+
+			DB::table('requisitions')
+					->where('id', '=', $id)
+					->update($data);
+			$this->res['status'] = true;
+			$this->res['msg'] = 'Notificaciones actualizadas correctamente.';
+			$this->NotificationsListInterface($id);
+
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);
+	}//RequisitionNotificationSave
+
+	public function NotificationsListInterface($id)
+	{
+		try{
+			$rq = DB::table('requisitions')
+					->select('notifications')
+					->where('id', '=', $id)
+					->first();
+
+			if($rq){
+				$rq->notifications = str_replace("'", '"', $rq->notifications);
+				$rq->notifications 	= json_decode($rq->notifications);
+				if( count($rq->notifications) > 0){
+					$this->res['status'] = true;
+					$this->res['data'] = $rq->notifications;
+				} else {
+					$this->res['msg'] = 'No hay Notificaciones';
+				}
+			} else {
+				$this->res['msg'] = 'La Requisición no existe.';
+			}
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);
+	}//NotificationsList()
+
+	public function NotificationsList()
+	{
+		try{
+			$id = $this->request->input('id');
+
+			$this->NotificationsListInterface();
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);
+	}//NotificationsList()
 
 }//RequisitionController

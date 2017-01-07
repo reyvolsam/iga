@@ -90,7 +90,7 @@
     <td colspan="1" scope="col" class = "datos">{{$data->requested_date}}</td>
     <td colspan="1" scope="col" class = "datos">{{$data->required_date}}</td>
     <td colspan="8" scope="col" class = "datos">{{$data->group_name}}</td>
-    <td colspan="2" scope="col" class = "datos">{{$data->id}}</td>
+    <td colspan="2" scope="col" class = "datos">#{{$data->id}}</td>
   </tr>
 </table>
 <br>
