@@ -213,7 +213,14 @@ class RequisitionController extends Controller {
 
 				$vc->notifications 	= str_replace("'", '"', $vc->notifications);
 				$vc->notifications 	= json_decode($vc->notifications);
-
+				$vc->notifications_total = 0;
+				if($vc->notifications != null){
+					foreach ($vc->notifications as $kn => $vn){
+						if ($vn->seen == 0){
+							$vc->notifications_total++;
+						}
+					}
+				}
 				$datetime1 = new DateTime(Date('Y-m-d H:i:s'));
 				$datetime2 = new DateTime($vc->required_date);
 				$interval = $datetime1->diff($datetime2);

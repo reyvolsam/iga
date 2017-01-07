@@ -72,6 +72,7 @@
   						<span ng-if = "elem.pre_order == 1" class="label label-primary">En espera de Orden de Compra...</span>
   					</td>
   					<td>
+  						<span ng-if = "elem.notifications_total > 0" class="badge btn-danger">@{{ elem.notifications_total }}</span>
 						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Editar Requisición"><i class = "fa fa-edit"></i></button> 
 						<button ng-if = "elem.pre_order == 0" type = "button" class = "btn btn-danger btn-xs" id = "req_del_@{{elem.id}}" ng-click = "vm.DeleteRequisition($index);" data-toggle="tooltip" data-placement="top" title="Eliminar Requisición"><i class = "fa fa-trash"></i></button>
 						<button ng-if = "elem.pre_order == 1" type = "button" class = "btn btn-info btn-xs" ng-click = "vm.EditRequisition($index);" data-toggle="tooltip" data-placement="top" title="Ver Requisición"><i class = "fa fa-eye"></i></button> 
