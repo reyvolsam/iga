@@ -327,7 +327,9 @@ class RequisitionController extends Controller {
 							->join('groups', 'groups.id', '=', 'requisitions.group_id')
 							->join('providers', 'providers.id', '=', 'requisitions.provider_id');
 				
-				$q2 = DB::table('requisitions');
+				$q2 = DB::table('requisitions')
+							->where('requisitions.finances_validate', '=', 0)
+							->where('pre_order', '=', 1);
 
 				if($filter_user != 'all'){
 					$q = $q->where('groups.id', '=', $filter_user);
@@ -343,7 +345,7 @@ class RequisitionController extends Controller {
 
 				$total_rows = $q2->count();
 
-				$msg = 'No hay Requisiciones hasta el momento.';
+				$msg = 'No hay Ordenes de Compra hasta el momento.';
 			}
 			foreach ($cl as $kc => $vc) {
 				$vc->products 	= str_replace("'", '"', $vc->products);

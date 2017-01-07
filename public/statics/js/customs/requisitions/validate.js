@@ -47,6 +47,7 @@ function requisition_validate_init($http, FileUploader, $scope){
 	{
 		vm.requisition_list = {};
 		$('#requisition_list_loader').show();
+        $('#requisition_list_msg').html('');
         $http.post('../requisition/validate/list', { page: vm.page, filter_user: vm.filter_user })
             .success(function(res) {
             	console.log(res);
