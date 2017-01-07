@@ -258,12 +258,15 @@ class RequisitionController extends Controller {
 	{
 		try{
 			$id = $this->request->input('id');
+			$filter_user = $this->request->input('filter_user');
+			$pag = $this->request->input('page');
 
 			DB::table('requisitions')
 					->where('id', '=', $id)
 					->delete();
 
 			$this->res['status'] = true;
+			$this->RequisitionListInterface($pag, $filter_user);
 			$this->res['msg'] = 'Requisición Eliminada Correctamente.';
 		} catch (\Exception $e) {
 			$this->res['msg'] = '¡Error!.'.$e;

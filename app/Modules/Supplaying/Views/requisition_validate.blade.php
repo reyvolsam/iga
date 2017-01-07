@@ -143,7 +143,7 @@
 				<div id = "save_validate_pay_msg"></div><!-- requisition_list_msg-->
 				<div class = "clearfix"></div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" ng-click = "vm.CancelValidatePay();" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type="button" class="btn btn-danger" ng-click = "vm.CancelValidatePay();" id = "cancel_validate_pay_btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
 					<button type = "submit" class = "btn btn-success" id = "submit_validate_pay_btn">Validar Pago de Requisición</button>
 				</div>
 			</form>

@@ -20,6 +20,7 @@ function requisition_validate_init($http, FileUploader, $scope){
     uploader.onProgressItem = function(fileItem, progress) {
         $('#submit_validate_pay_btn').html('Subiendo Baucher de Pago...');
         $('#submit_validate_pay_btn').attr('disabled', 'disabled');
+        $('#cancel_validate_pay_btn').attr('disabled', 'disabled');
         $('#progress_bar_file').css('width', progress+'%');
     };
 
@@ -27,6 +28,7 @@ function requisition_validate_init($http, FileUploader, $scope){
         $('#validate_pay_modal').modal('toggle');
         $('#submit_validate_pay_btn').html('Guardar Producto');
         $('#submit_validate_pay_btn').removeAttr('disabled');
+        $('#cancel_validate_pay_btn').removeAttr('disabled');
 
         $('#save_validate_pay_msg').html('');
        	$('#progress_bar_file').css('width', '0%');

@@ -682,7 +682,7 @@ function requisition_init($http){
   		if(r == true){
   			$('#req_del_'+vm.requisition_list[ind].id).html('<i class="fa fa-spinner fa-spin fa-1x"></i>');
   			$('#req_del_'+vm.requisition_list[ind].id).attr('disabled', 'disabled');
-	        $http.post('requisition/delete', { id:vm.requisition_list[ind].id })
+	        $http.post('requisition/delete', { id:vm.requisition_list[ind].id, page: vm.page, filter_user: vm.filter_user })
 	            .success(function(res) {
 	            	console.log(res);
                     $('#req_del_'+vm.requisition_list[ind].id).removeAttr('disabled');
