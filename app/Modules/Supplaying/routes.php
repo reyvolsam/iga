@@ -6,6 +6,8 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 	Route::post('supplaying/provider/save', 'ProviderController@ProviderSave');
 	Route::post('supplaying/provider/delete', 'ProviderController@ProviderDelete');
 	Route::post('supplaying/provider/list', 'ProviderController@ProviderList');
+	Route::post('supplaying/provider/list/select', 'ProviderController@ProviderListSelect');
+	
 
 	Route::get('supplaying/product/{product_type}', 'ProductController@ProductIndex');
 	Route::post('supplaying/product/save/', 'ProductController@SaveProduct');

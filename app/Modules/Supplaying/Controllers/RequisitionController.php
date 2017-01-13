@@ -550,7 +550,17 @@ class RequisitionController extends Controller {
 							$rq->provider_email 	= json_decode($rq->provider_email);
 
 							foreach ($rq->provider_email as $kpe => $vpe) {
+								try{
+								Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
+						            $m->from('', 'Your Application');
 
+						            $m->to($user->email, $user->name)->subject('Your Reminder!');
+						        });
+						        $vpe->sended = 1;
+								} catch (\Exception $e) {
+									$vpe->msg = 'El Correo Electronico no se pudo enviar.';
+									$vpe->sended = 0;
+								}
 							}*/
 
 							$this->res['status'] = true;
@@ -641,25 +651,31 @@ class RequisitionController extends Controller {
 	{
 		try{
 			$user = \Sentry::getUser();
-			/*$rq = DB::table('requisitions')
-							->where('id', '=', 3)
-							->first();
+	 						$rq = DB::table('requisitions')
+	 									->where('id', '=', 8)
+	 									->first();
 
-			$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
-			$rq->provider_email 	= json_decode($rq->provider_email);*/
-
-			/*foreach ($rq->provider_email AS $kpe => $vpe) {
-				Mail::send('emails.order_buy', ['user' => $user, 'vpe' => $vpe], function ($m) use ($vpe) {
-		            $m->from('samuel43_7@hotmail.com', 'Your Application');
-
-		            $m->to($vpe->email, $vpe->name)->subject('Your Reminder!');
-		        });
-			}*/
-				Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
+							$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
+							$rq->provider_email 	= json_decode($rq->provider_email);
+							$pathToFile = 'order_buy_ticket/251_1483780146.png';
+							foreach ($rq->provider_email as $kpe => $vpe) {
+								try{
+								Mail::send('emails.order_buy', ['user' => $user], function ($m, $pathToFile, $vps) use ($user, $pathToFile, $v) {
+						            $m->from($user->email, 'Orden de Compra Pagada Correctamente.');
+									$m->attach($pathToFile, ['as' => 'Orden de Compra', 'mime' => 'OC']);
+						            $m->to($v->email, $user->name)->subject('Orden de Compra Pagada Correctamente.');
+						        });
+						        $vpe->sended = 1;
+								} catch (\Exception $e) {
+									$vpe->msg = 'El Correo Electronico no se pudo enviar.';
+									$vpe->sended = 0;
+								}
+							}
+				/*Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
 		            $m->from('samuel43_7@hotmail.com', 'Your Application');
 
 		            $m->to($user->email, $user->name)->subject('Your Reminder!');
-		        });
+		        })*/;
 		} catch (\Exception $e) {
 			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 		}

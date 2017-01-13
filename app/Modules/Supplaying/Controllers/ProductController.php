@@ -56,6 +56,7 @@ class ProductController extends Controller {
 						$data['description'] 	= $this->request->input('description');
 						$data['updated_at'] 	= date('Y-m-d');
 						$data['total'] 			= 0;
+						$uploader 				= $this->request->input('uploader');
 
 						$validator = Validator::make($data, [
 				        			'code' 			=> 'required',
@@ -68,31 +69,41 @@ class ProductController extends Controller {
 				        		]);
 						if ( !$validator->fails() ){
 							if( $data['max'] > $data['min'] ){
-								$checkcode = DB::table($table)
+									if($id == null){
+										$checkcode = DB::table($table)
 												->where('code', '=', $data['code'])
 												->get();
-								if( count($checkcode) == 0 ){
-									if($id == null){
-										$data['created_at'] 	= date('Y-m-d');
-										$product_id = DB::table($table)
-															->insertGetId($data);
-										$this->request->session()->put('product.id', $product_id);
-										$this->request->session()->put('product.type', $table);
-										$this->res['msg'] = 'Materia Prima Guardada Correctamente.';
-										$this->res['status'] = true;
+										if( count($checkcode) == 0 ){
+											$data['created_at'] 	= date('Y-m-d');
+											$product_id = DB::table($table)
+																->insertGetId($data);
+											$this->request->session()->put('product.status', $uploader);
+											$this->request->session()->put('product.id', $product_id);
+											$this->request->session()->put('product.type', $table);
+											$this->res['msg'] = 'Materia Prima Guardada Correctamente.';
+											$this->res['status'] = true;
+										} else {
+											$this->res['msg'] = 'Codigo de Producto repetido.';
+										}
 									} else {
-										$product_id = DB::table($table)
-															->where('id', '=', $id)
-															->update($data);
-										$this->request->session()->put('product.id', $product_id);
-										$this->request->session()->put('product.type', $table);
-										$this->res['msg'] = 'Materia Prima Actualizada Correctamente.';
-										$this->res['status'] = true;
+										$checkcode = DB::table($table)
+															->where('code', '=', $data['code'])
+															->where('code', '!=', $data['code'])
+															->get();
+										if( count($checkcode) == 0 ){
+											$product_id = DB::table($table)
+																	->where('id', '=', $id)
+																	->update($data);
+											$this->request->session()->put('product.status', $uploader);
+											$this->request->session()->put('product.id', $id);
+											$this->request->session()->put('product.type', $table);
+											$this->res['msg'] = 'Materia Prima Actualizada Correctamente.';
+											$this->res['status'] = true;
+										} else {
+											$this->res['msg'] = 'Codigo de Producto repetido.';
+										}
 									}
 									$this->ProductListInterface($type, $pag);
-								} else {
-									$this->res['msg'] = 'Codigo de Producto repetido.';
-								}
 							} else {
 								$this->res['msg'] = 'El Valor Maximo tiene que ser Mayor a Minimo.';	
 							}
@@ -114,9 +125,9 @@ class ProductController extends Controller {
 						$data['updated_at'] 	= date('Y-m-d');
 
 						$data['total'] 			= 0;
+						$uploader 				= $this->request->input('uploader');
 
 						$validator = Validator::make($data, [
-
 				        			'name' 			=> 'required',
 				        			'provider_id' 	=> 'required',
 				        			'max' 			=> 'required|integer',
@@ -127,29 +138,39 @@ class ProductController extends Controller {
 				        		]);
 						if ( !$validator->fails() ){
 							if( $data['max'] > $data['min'] ){
-								$checkname = DB::table($table)
-												->where('name', '=', $data['name'])
-												->get();
-								if( count($checkname) == 0 ){
-									if($id == null){
+								if($id == null){
+									$checkname = DB::table($table)
+														->where('name', '=', $data['name'])
+														->get();
+									if( count($checkname) == 0 ){
 										$data['created_at'] 	= date('Y-m-d');
 										$product_id = DB::table($table)
 															->insertGetId($data);
-										$this->request->session()->put('product.id', $product_id);
+										$this->request->session()->put('product.status', $uploader);
+										$this->request->session()->put('product.id', $id);
 										$this->request->session()->put('product.type', $table);
-										$this->res['msg'] = 'Producto Semiterminado Guardad0 Correctamente.';
+										$this->res['msg'] = 'Producto Semiterminado Guardado Correctamente.';
 										$this->res['status'] = true;
 									} else {
+										$this->res['msg'] = 'Nombre de Producto repetido.';
+									}
+								} else {
+									$checkname = DB::table($table)
+													->where('name', '=', $data['name'])
+													->where('name', '!=', $data['name'])
+													->get();
+									if( count($checkname) == 0 ){
 										$product_id = DB::table($table)
 															->where('id', '=', $id)
 															->update($data);
-										$this->request->session()->put('product.id', $product_id);
+										$this->request->session()->put('product.status', $uploader);
+										$this->request->session()->put('product.id', $id);
 										$this->request->session()->put('product.type', $table);
 										$this->res['msg'] = 'Producto Semiterminado Actualizado Correctamente.';
 										$this->res['status'] = true;
+									} else {
+										$this->res['msg'] = 'Nombre de Producto repetido.';
 									}
-								} else {
-									$this->res['msg'] = 'Nombre de Producto repetido.';
 								}
 							} else {
 								$this->res['msg'] = 'El Valor Maximo tiene que ser Mayor a Minimo.';	
@@ -186,6 +207,9 @@ class ProductController extends Controller {
 
 						$data['updated_at'] 			= date('Y-m-d');
 
+						$uploader 						= $this->request->input('uploader');
+						$uploader_img 					= $this->request->input('uploader_img');
+
 						$validator = Validator::make($data, [
 
 				        			'product_type_id' 		=> 'required',
@@ -204,16 +228,16 @@ class ProductController extends Controller {
 				        			'product_use' 			=> 'required'
 				        		]);
 						if ( !$validator->fails() ){
-							$checkfeatures = DB::table($table)
-													->where('adjust_id', '=', $data['adjust_id'])
-													->where('class_id', '=', $data['class_id'])
-													->where('model_id', '=', $data['model_id'])
-													->where('color_id', '=', $data['color_id'])
-													->where('feets_id', '=', $data['feets_id'])
-													->get();
-							if( count($checkfeatures) == 0 ){
-								$data['created_at'] 	= date('Y-m-d');
-								if($id == null){
+							if($id == null){
+								$checkfeatures = DB::table($table)
+														->where('adjust_id', '=', $data['adjust_id'])
+														->where('class_id', '=', $data['class_id'])
+														->where('model_id', '=', $data['model_id'])
+														->where('color_id', '=', $data['color_id'])
+														->where('feets_id', '=', $data['feets_id'])
+														->get();
+								if( count($checkfeatures) == 0 ){
+									$data['created_at'] 	= date('Y-m-d');
 									$product_id = DB::table($table)
 														->insertGetId(array(
 										        			'product_type_id' 		=> $data['product_type_id'],
@@ -226,7 +250,7 @@ class ProductController extends Controller {
 										        			'unit' 					=> $data['unit'],
 										        			'brand' 				=> $data['brand'],
 										        			'description' 			=> $data['description'],
-										        			'product_use' 			=> $data['use']
+										        			'product_use' 			=> $data['product_use']
 														));
 									DB::table('finished_products_coatza')
 													->insert(array(
@@ -244,17 +268,75 @@ class ProductController extends Controller {
 														'prod_max' 	=> $data['guadalajara_max_ped'],
 														'status' 	=> $data['guadalajara_status']
 													));
+									$this->request->session()->put('product.status', $uploader);
+									$this->request->session()->put('product.status_img', $uploader_img);
 									$this->request->session()->put('product.id', $product_id);
 									$this->request->session()->put('product.type', $table);
 
 									$this->res['status'] = true;
 									$this->res['msg'] = 'Producto Terminado Guardado Creado Correctamente.';
 								} else {
-									$this->res['status'] = true;
-									$this->res['msg'] = 'Producto Terminado Actualizado Correctamente.';
+									$this->res['msg'] = 'Un producto con estas caracteristicas ya ha sido ingresado anteriormente revise sus caracteristicas.';
 								}
 							} else {
-								$this->res['msg'] = 'Un producto con estas caracteristicas ya ha sido ingresado anteriormente revise sus caracteristicas.';
+								$checkfeatures = DB::table($table)
+														->where('adjust_id', '=', $data['adjust_id'])
+														->where('class_id', '=', $data['class_id'])
+														->where('model_id', '=', $data['model_id'])
+														->where('color_id', '=', $data['color_id'])
+														->where('feets_id', '=', $data['feets_id'])
+														->get();
+								if( count($checkfeatures) > 0 ){
+									DB::table($table)
+											->where('id', '=', $id)
+											->update([
+							        			'provider_id' 			=> $data['provider_id'],
+							        			'unit' 					=> $data['unit'],
+							        			'brand' 				=> $data['brand'],
+							        			'description' 			=> $data['description'],
+							        			'product_use' 			=> $data['product_use']
+											]);
+								} else {
+									DB::table($table)
+											->where('id', '=', $id)
+											->update([
+							        			'product_type_id' 		=> $data['product_type_id'],
+							        			'adjust_id' 			=> $data['adjust_id'],
+							        			'class_id' 				=> $data['class_id'],
+							        			'model_id' 				=> $data['model_id'],
+							        			'color_id' 				=> $data['color_id'],
+							        			'feets_id' 				=> $data['feets_id'],
+							        			'provider_id' 			=> $data['provider_id'],
+							        			'unit' 					=> $data['unit'],
+							        			'brand' 				=> $data['brand'],
+							        			'description' 			=> $data['description'],
+							        			'product_use' 			=> $data['product_use']
+											]);
+								}
+								$data['updated_at'] 	= date('Y-m-d');
+
+								DB::table('finished_products_coatza')
+												->where('id', '=', $id)
+												->update([
+													'min' 		=> $data['coatza_min'],
+													'max' 		=> $data['coatza_max'],
+													'prod_max' 	=> $data['coatza_max_ped'],
+													'status' 	=> $data['coatza_status']
+												]);
+								DB::table('finished_products_guadalajara')
+												->where('id', '=', $id)
+												->update([
+													'min' 		=> $data['guadalajara_min'],
+													'max' 		=> $data['guadalajara_max'],
+													'prod_max' 	=> $data['guadalajara_max_ped'],
+													'status' 	=> $data['guadalajara_status']
+												]);
+								$this->request->session()->put('product.status', $uploader);
+								$this->request->session()->put('product.status_img', $uploader_img);
+								$this->request->session()->put('product.id', $id);
+								$this->request->session()->put('product.type', $table);
+								$this->res['status'] = true;
+								$this->res['msg'] = 'Producto Terminado Actualizado Correctamente.';
 							}
 						} else {
 							$this->res['msg'] = 'Todos los campos son obligatorios.';
@@ -275,44 +357,47 @@ class ProductController extends Controller {
 	{
 		$data = array();
 		$files = array();
+		$status = $this->request->session()->get('product.status');
 		$id = $this->request->session()->get('product.id');
 		$table = $this->request->session()->get('product.type');
 		$uploaddir = 'technical_file/';
 
-		if(count($_FILES) > 0 ){
-			foreach($_FILES as $file){
-				$porciones = explode(".", $file['name']);
-				$ext = $porciones[count($porciones)-1];
-				unset($porciones[count($porciones)-1]);
-				$name = implode("", $porciones);
-				$file['name'] = $name.'.'.$ext;
+		if($status == true){
+			if(count($_FILES) > 0 ){
+				foreach($_FILES as $file){
+					$porciones = explode(".", $file['name']);
+					$ext = $porciones[count($porciones)-1];
+					unset($porciones[count($porciones)-1]);
+					$name = implode("", $porciones);
+					$file['name'] = $name.'.'.$ext;
 
-				list($txt, $ext) = explode(".", $file['name']);
-				$rand = rand(1, 500);
-				$actual_image_name = $rand."_".time().".".$ext;
-				if(move_uploaded_file($file['tmp_name'], $uploaddir .basename($actual_image_name))){
-					try{
-	 					$t = DB::table($table)
-	 								->where('id', '=', $id)
-	 								->first();
-						if( count($t) == 1 ){
-								DB::table($table)
-	 								->where('id', '=', $id)
-	 								->update(array(
-	 										'technical_file' => $actual_image_name
-	 									));
-							$this->res['status'] = true;
-							$this->res['msg'] = 'Ficha Tecnica Subida Correctamente.';
+					list($txt, $ext) = explode(".", $file['name']);
+					$rand = rand(1, 500);
+					$actual_image_name = $rand."_".time().".".$ext;
+					if(move_uploaded_file($file['tmp_name'], $uploaddir .basename($actual_image_name))){
+						try{
+		 					$t = DB::table($table)
+		 								->where('id', '=', $id)
+		 								->first();
+							if($t){
+									DB::table($table)
+		 								->where('id', '=', $id)
+		 								->update(['technical_file' => $actual_image_name]);
+								$this->res['status'] = true;
+								$this->res['msg'] = 'Ficha Tecnica Subida Correctamente.';
+							}
+						} catch (\Exception $e) {
+							$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 						}
-					} catch (\Exception $e) {
-						$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+					} else {
+					    $this->res['msg'] = 'Error al momento de subir el archivo, intente mas tarde.';
 					}
-				} else {
-				    $this->res['msg'] = 'Error al momento de subir el archivo, intente mas tarde.';
 				}
+			} else {
+				$this->res['msg'] = 'Selecciona un Archivo.';
 			}
 		} else {
-			$this->res['msg'] = 'Selecciona un Archivo.';
+			$this->res['msg'] = 'No se Subio Ficha Tecnica.';
 		}
 		echo json_encode($this->res);
 	}//UploadFileProduct
@@ -321,44 +406,47 @@ class ProductController extends Controller {
 	{
 		$data = array();
 		$files = array();
+		$status_img = $this->request->session()->get('product.status_img');
 		$id = $this->request->session()->get('product.id');
 		$table = $this->request->session()->get('product.type');
 		$uploaddir = 'img_product/';
 
-		if(count($_FILES) > 0 ){
-			foreach($_FILES as $file){
-				$porciones = explode(".", $file['name']);
-				$ext = $porciones[count($porciones)-1];
-				unset($porciones[count($porciones)-1]);
-				$name = implode("", $porciones);
-				$file['name'] = $name.'.'.$ext;
+		if($status_img == true){
+			if(count($_FILES) > 0 ){
+				foreach($_FILES as $file){
+					$porciones = explode(".", $file['name']);
+					$ext = $porciones[count($porciones)-1];
+					unset($porciones[count($porciones)-1]);
+					$name = implode("", $porciones);
+					$file['name'] = $name.'.'.$ext;
 
-				list($txt, $ext) = explode(".", $file['name']);
-				$rand = rand(1, 500);
-				$actual_image_name = $rand."_".time().".".$ext;
-				if(move_uploaded_file($file['tmp_name'], $uploaddir .basename($actual_image_name))){
-					try{
-	 					$t = DB::table($table)
-	 								->where('id', '=', $id)
-	 								->first();
-						if( count($t) == 1 ){
-								DB::table($table)
-	 								->where('id', '=', $id)
-	 								->update(array(
-	 										'img_product' => $actual_image_name
-	 									));
-							$this->res['status'] = true;
-							$this->res['msg'] = 'Imagen del Producto Subida Correctamente.';
+					list($txt, $ext) = explode(".", $file['name']);
+					$rand = rand(1, 500);
+					$actual_image_name = $rand."_".time().".".$ext;
+					if(move_uploaded_file($file['tmp_name'], $uploaddir .basename($actual_image_name))){
+						try{
+		 					$t = DB::table($table)
+		 								->where('id', '=', $id)
+		 								->first();
+							if( count($t) == 1 ){
+									DB::table($table)
+		 								->where('id', '=', $id)
+		 								->update(array(
+		 										'img_product' => $actual_image_name
+		 									));
+								$this->res['status'] = true;
+								$this->res['msg'] = 'Imagen del Producto Subida Correctamente.';
+							}
+						} catch (\Exception $e) {
+							$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 						}
-					} catch (\Exception $e) {
-						$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+					} else {
+					    $this->res['msg'] = 'Error al momento de subir el archivo, intente mas tarde.';
 					}
-				} else {
-				    $this->res['msg'] = 'Error al momento de subir el archivo, intente mas tarde.';
 				}
+			} else {
+				$this->res['msg'] = 'Selecciona un Archivo.';
 			}
-		} else {
-			$this->res['msg'] = 'Selecciona un Archivo.';
 		}
 		echo json_encode($this->res);
 	}//UploadImgProduct
@@ -428,6 +516,14 @@ class ProductController extends Controller {
 									->first();
 						if($r){$vl->feets = $r->name;}
 						
+						$fpg = DB::table('finished_products_guadalajara')
+								->where('finished_product_id', '=', $vl->id)
+								->first();
+						$vl->finished_products_guadalajara = $fpg;
+						$fpc = DB::table('finished_products_guadalajara')
+								->where('finished_product_id', '=', $vl->id)
+								->first();
+						$vl->finished_products_coatza = $fpc;
 					}
 					break;
 				default:

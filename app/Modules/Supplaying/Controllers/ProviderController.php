@@ -99,23 +99,24 @@ class ProviderController extends Controller {
 
 							if($provider_id == null){
 
-							$prfc = DB::table('providers')
-										->where('rfc', '=', $data['rfc'])
-										->get();
+								$prfc = DB::table('providers')
+											->where('rfc', '=', $data['rfc'])
+											->where('provider_type_id', '=', $data['provider_type_id'])
+											->get();
 
-							if( count($prfc) == 0){
-								$idp = DB::table('providers')
-											->insertGetId($data);
-								foreach ($banks as $kb => $vb) {
-									DB::table('providers_banks')
-											->insert(array(
-													'bank_id' 		=> $vb['id'],
-													'provider_id'	=> $idp,
-													'no_count'		=> $vb['no_count'],
-													'inter_key'		=> $vb['inter_key'],
-													'branch_office'	=> $vb['branch_office'],
-													'type_coin'		=> $vb['type_coin']
-												));
+								if( count($prfc) == 0){
+									$idp = DB::table('providers')
+												->insertGetId($data);
+									foreach ($banks as $kb => $vb) {
+										DB::table('providers_banks')
+												->insert(array(
+														'bank_id' 		=> $vb['id'],
+														'provider_id'	=> $idp,
+														'no_count'		=> $vb['no_count'],
+														'inter_key'		=> $vb['inter_key'],
+														'branch_office'	=> $vb['branch_office'],
+														'type_coin'		=> $vb['type_coin']
+													));
 
 								}
 								$this->res['msg'] = 'Proveedor Guardado Correctamente.';
@@ -252,6 +253,41 @@ class ProviderController extends Controller {
 
 		return response()->json($this->res);
 	}//ProviderList
+
+	public function ProviderListSelect()
+	{
+		try{
+			$type = $this->request->input('type');
+			$tp = null;
+			switch ($type) {
+				case 'raw_material':
+						$tp = 1;
+					break;
+				case 'finished_product':
+						$tp = 3;
+					break;
+				default:
+						$tp = '';
+						$pn = '-';
+					break;
+				}
+
+				$lp = DB::table('providers')
+							->where('provider_type_id', '=', $tp)
+							->orderBy('id', 'desc')
+							->get();
+				if( count($lp) > 0 ){
+					$this->res['status'] = true;
+					$this->res['data'] = $lp;
+				} else {
+					$this->res['msg'] = 'No hay Proveedores registrados.';
+				}
+				
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos'.$e;
+		}
+		return response()->json($this->res);
+	}//ProviderListSelect()
 
 	public function ProviderDelete()
 	{

@@ -97,7 +97,10 @@
 				<td>@{{elem.weight}}</td>
 				<td>@{{elem.unit}}</td>
 				<td>@{{elem.total}}</td>
-				<td>  </td>
+				<td>  
+					<button class = "btn btn-info btn-xs" ng-click = "vm.EditProduct($index)" ><i class = "fa fa-edit"></i></button>  
+					<button class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProduct($index)" ><i class = "fa fa-trash"></i></button>  
+				</td>
 			</tr>
 		</tbody>
 	</table>
@@ -122,10 +125,14 @@
 				<td>@{{elem.unit}}</td>
 				<td>@{{elem.provider_name}}</td>
 				<td>@{{elem.product_use}}</td>
-				<td>  </td>
+				<td>  
+					<button class = "btn btn-info btn-xs" ng-click = "vm.EditProduct($index)" ><i class = "fa fa-edit"></i></button>
+					<button class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProduct($index)" ><i class = "fa fa-trash"></i></button>
+				</td>
 			</tr>
 		</tbody>
 	</table>
+	<i  id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	@endif
 	</div><!--/box-body-->
 	<div class = "box-footer">
@@ -150,8 +157,8 @@
 							</div><!--/wrapper-->
 						</div><!--/form-group-->
 					</div><!--/file-field-->
-					<div id = "technical_file_raw_material_div">
-						<a href="#" target = "_blank" class = "label label-info" id = "product_technical_file"><i class = "fa fa-download"></i> Descargar Ficha Tecnica</a>
+					<div id = "technical_file_div">
+						<a href="" target = "_blank" class = "label label-info" id = "product_technical_file"><i class = "fa fa-download"></i> Descargar Ficha Tecnica</a>
 					</div><!--/technical_file_div_raw_material-->
 					<br />
 					<table class = "table table-bordered table-striped">
@@ -206,12 +213,12 @@
 						<label for = "descripcion" class="control-label">Descripción</label>
 						<textarea class="form-control" rows="5" id = "descripcion" name = "descripcion" ng-model = "vm.product.description"></textarea>
 					</div><!--/form-group-->
-					<div id = "product_msg"></div><!--/product_msg-->
+					<div id = "save_product_msg"></div><!--/product_msg-->
                   	<div class="progress xs">
                     	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
                   	</div><!---/progress-->
 					<div class="modal-footer">			
-						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-danger" id = "close_btn_product" ng-click = "vm.CloseSaveProduct();" data-dismiss="modal">Cerrar</button>
 						<button type = "submit" class = "btn btn-success" id = "save_product_btn">Guardar Producto</button>
 					</div><!--/footer-->
 				</div><!--/modal-body-->
@@ -237,6 +244,9 @@
 							</div><!--/wrapper-->
 						</div><!--/form-group-->
 					</div><!--/file-field-->
+					<div id = "technical_file_div">
+						<a href="" target = "_blank" class = "label label-info" id = "product_technical_file"><i class = "fa fa-download"></i> Descargar Ficha Tecnica</a>
+					</div><!--/technical_file_div_raw_material-->
 					<table class = "table table-bordered table-striped">
 						<thead>
 							<th>Nombre del Archivo</th>
@@ -270,8 +280,8 @@
 					<div class="form-group">
 						<label for = "unidad" class="control-label">Unidad</label>
 							<select id = "unidad" name = "unidad" class = "form-control" ng-model = "vm.product.unit">
-								<option value = " ">Seleccione una Opción</option>
-								<option value = "pieza">Pieza</option>
+								<option value = "">Seleccione una Opción</option>
+								<option value = "Pieza">Pieza</option>
 								<option value = "Cm.">Cm.</option>
 								<option value = "Kg.">Kg.</option>
 								<option value = "Ln">Ln.</option>
@@ -289,12 +299,12 @@
 						<label for = "descripcion" class="control-label">Descripción</label>
 						<textarea class="form-control" rows="5" id = "descripcion" name = "descripcion" ng-model = "vm.product.description"></textarea>
 					</div><!--/form-group-->
-					<div id = "product_msg"></div><!--/product_msg-->
+					<div id = "save_product_msg"></div><!--/product_msg-->
                   	<div class="progress xs">
                     	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
                   	</div><!---/progress-->
 					<div class="modal-footer">			
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-danger" id = "close_btn_product" ng-click = "vm.CloseSaveProduct();" data-dismiss="modal">Cerrar</button>
 						<button type = "submit" class = "btn btn-success" id = "save_product_btn">Guardar Producto</button>
 					</div><!--/footer-->
 				</div><!--/modal-body-->
@@ -313,6 +323,10 @@
 			<form method = "post" ng-submit = "vm.SaveProductPT();">
 				<div class="modal-body">
 
+					<div id = "technical_file_div">
+						<a href="" target = "_blank" class = "label label-info" id = "product_technical_file"><i class = "fa fa-download"></i> Descargar Ficha Tecnica</a>
+					</div><!--/technical_file_div_raw_material-->
+					<br />
 					<div class="col-lg-6">
 						<div class="file-field input-field">
 							<div class="form-group">
@@ -323,7 +337,6 @@
 							</div><!--/form-group-->
 						</div><!--/file-field-->
 					</div><!--/col-lg-6-->
-
 					<table class = "table table-bordered table-striped">
 						<thead>
 							<th>Nombre del Archivo</th>
@@ -338,8 +351,9 @@
 							</tr>
 						</tbody>
 					</table>
-
-
+					<div id = "img_product_div">
+						<img src = "#" id = "img_product_file" width = "500" height = "350" class = "img-thumbnail" />
+					</div><!--/technical_file_div_raw_material-->
 					<div class="col-lg-6">
 						<div class="file-field input-field">
 							<div class="form-group">
@@ -365,6 +379,7 @@
 							</tr>
 						</tbody>
 					</table>
+
 					<div class="col-lg-6" ng-init = "vm.ProductTypeList();">
 						<label for = "product_type_id" class="control-label">Tipo de Producto</label>
 						<select class = "form-control" id = "product_type_id" name = "product_type_id" ng-model = "vm.product.product_type_id" ng-change = "vm.ChangeProductType();" ng-options="pt_list.id as pt_list.name for pt_list in vm.product_type_list">
@@ -474,9 +489,10 @@
 								<div class="col-lg-6">
 									<label for = "unit" class="control-label">Unidad</label>
 									<select id = "unit" name = "unit" class = "form-control" ng-model = "vm.product.unit">
-										<option value = "">Seleccione una Opción...</option>
-										<option value = "pieza">Pieza</option>
+										<option value = "">Seleccione una Opción</option>
+										<option value = "Pieza">Pieza</option>
 										<option value = "Cm.">Cm.</option>
+										<option value = "Mtrs.">Mtrs.</option>
 										<option value = "Kg.">Kg.</option>
 										<option value = "Ln">Ln.</option>
 									</select>
@@ -517,7 +533,7 @@
 					</div><!--/panel-->
 
 					<div class="modal-footer">			
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+						<button type="button" class="btn btn-danger" id = "close_btn_product" ng-click = "vm.CloseSaveProduct();" data-dismiss="modal">Cerrar</button>
 						<button type = "submit" class = "btn btn-success" id = "save_product_btn">Guardar Producto</button>
 					</div><!--/footer-->
 				</div><!--/modal-body-->
