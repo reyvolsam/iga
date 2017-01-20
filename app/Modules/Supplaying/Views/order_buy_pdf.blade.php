@@ -241,10 +241,12 @@ fin -->
   <tr class="center list_article">
     <td width ="15%" scope="col" class="left">TEL:</td>
     <td colspan="2" scope="col" class="left">
-      @foreach($data->phones AS $t)
-      {{$t->phone}}&nbsp;
-      {{$t->exts}}&nbsp;
-      @endforeach
+      @if( count($data->phones) )    
+        @foreach($data->phones AS $t)
+        {{$t->phone}}&nbsp;
+        {{$t->exts}}&nbsp;
+        @endforeach
+      @endif
     </td>
     <td colspan="4" scope="col" class="left">RFC: &nbsp;{{$data->provider_rfc}}</td>
     <td colspan="3" scope="col" class="left">No. Req: &nbsp; {{$data->id}}</td>
@@ -261,23 +263,25 @@ fin -->
   <tr class="center encabezado list_article" >
     <td colspan="12" scope="col"  class ="left ">&nbsp;DATOS BANCARIOS</td>
   </tr>
-  @foreach($data->provider_banks AS $b) 
-  <tr class="center table_list" >
-    <td colspan="3" scope="col"  class ="left ">&nbsp;BANCO</td>
-    <td colspan="9" scope="col"  class ="left ">{{$b->bank_name}}</td>
-  </tr>
-  <tr class="center table_list" >
-    <td colspan="3" scope="col"  class ="left ">&nbsp;CUENTA</td>
-    <td colspan="9" scope="col"  class ="left ">{{$b->no_count}}</td>
-  </tr>
-  <tr class="center table_list" >
-    <td colspan="3" scope="col"  class ="left ">&nbsp;CLAVE INTERBANCARIA</td>
-    <td colspan="9" scope="col"  class ="left ">{{$b->inter_key}}</td>
-  </tr>
-  <tr class="center encabezado list_article" >
-    <td colspan="12" scope="col"  class ="left">&nbsp;</td>
-  </tr>
-  @endforeach
+  @if( count($data->provider_banks) )
+    @foreach($data->provider_banks AS $b) 
+    <tr class="center table_list" >
+      <td colspan="3" scope="col"  class ="left ">&nbsp;BANCO</td>
+      <td colspan="9" scope="col"  class ="left ">{{$b->bank_name}}</td>
+    </tr>
+    <tr class="center table_list" >
+      <td colspan="3" scope="col"  class ="left ">&nbsp;CUENTA</td>
+      <td colspan="9" scope="col"  class ="left ">{{$b->no_count}}</td>
+    </tr>
+    <tr class="center table_list" >
+      <td colspan="3" scope="col"  class ="left ">&nbsp;CLAVE INTERBANCARIA</td>
+      <td colspan="9" scope="col"  class ="left ">{{$b->inter_key}}</td>
+    </tr>
+    <tr class="center encabezado list_article" >
+      <td colspan="12" scope="col"  class ="left">&nbsp;</td>
+    </tr>
+    @endforeach
+  @endif
   <tr class="center list_article">
     <table class ="table" width ="100 %" cellpadding="0" >
       <tr class="center datos franja" >

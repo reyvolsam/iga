@@ -183,6 +183,11 @@ function requisition_init($http){
 
 	vm.GetDate = function ()
 	{
+		Getdate();
+	}//vm.GetDate()
+
+	function Getdate()
+	{
         $http.post('requisition/get_date')
             .success(function(res) {
                 if(res.status){
@@ -191,7 +196,7 @@ function requisition_init($http){
         }).error(function (res){
             console.log(res);
         });
-	}//vm.GetDate()
+	}//Getdate()
 
 	vm.ChangeProductType = function ()
 	{
@@ -520,7 +525,6 @@ function requisition_init($http){
 			ban = true;
 		}
 		if(ban == true){
-			console.log('entro 3');
 			if(vm.finances.money_type == 'USD'){
 				console.log('entro 4');
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
@@ -674,7 +678,6 @@ function requisition_init($http){
 		vm.requisition.observations = vm.requisition_list[ind].observations;
 
 		vm.notification_list = vm.requisition_list[ind].notifications;
-		console.log(vm.notification_list);
 		if(vm.requisition_list[ind].pre_order == 1){
 			$('#required_date').attr('disabled', 'disabled');
 			$('#iva').attr('disabled', 'disabled');
@@ -758,8 +761,12 @@ function requisition_init($http){
   	}//vm.EditProductPieces
 
   	
-	$('#EditProductListModal').on('hidden.bs.modal', function (e) {
-
+	$('#EditProductListModal').on('shown.bs.modal', function (e) {
+		if(vm.requisition_list[vm.ind].pre_order == 1){
+			console.log('cancellllll');
+			$('#EditProductListModal').modal('toggle');
+			alert('No Puedes Editar Productos');
+		}
 	});
 
 	vm.ChangePiecesEdit = function ()
@@ -894,6 +901,19 @@ function requisition_init($http){
 		vm.products_list = Array();
 		vm.product_list_select = {};
 
+		$('#required_date').removeAttr('disabled');
+		$('#iva').removeAttr('disabled');
+		$('#use').removeAttr('disabled');
+		$('#observations').removeAttr('disabled');
+		
+		$('#submit_requisition_btn').removeAttr('disabled');
+		$('#submit_requisition_btn').show();
+		$('#product_type_div').show();
+		$('#finances_info').show();
+		$('#add_product_item_btn').removeAttr('disabled');
+		$('#add_product_item_btn').show();
+
+		Getdate();
 		Product_Init();
 		Finances_Init();
  		RequisitionList();

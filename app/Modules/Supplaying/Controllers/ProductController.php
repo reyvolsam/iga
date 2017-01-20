@@ -342,6 +342,57 @@ class ProductController extends Controller {
 							$this->res['msg'] = 'Todos los campos son obligatorios.';
 						}
 					break;
+				case 'others_product':
+						$table = 'others_products';
+
+						$data['name'] 			= $this->request->input('name');
+						$data['provider_id'] 	= $this->request->input('provider_id');
+						$data['unit'] 			= $this->request->input('unit');
+						$data['description'] 	= $this->request->input('description');
+						$data['updated_at'] 	= date('Y-m-d');
+						$data['total'] 			= 0;
+
+						$validator = Validator::make($data, [
+				        			'name' 			=> 'required',
+				        			'provider_id' 	=> 'required',
+				        			'unit' 			=> 'required',
+				        			'description' 	=> 'required'
+				        		]);
+						if ( !$validator->fails() ){
+							if($id == null){
+								$checkcode = DB::table($table)
+										->where('name', '=', $data['name'])
+										->get();
+								if( count($checkcode) == 0 ){
+									$data['created_at'] 	= date('Y-m-d');
+									$product_id = DB::table($table)
+														->insertGetId($data);
+									$this->res['msg'] = 'Producto Vario Guardado Correctamente.';
+									$this->res['status'] = true;
+								} else {
+									$this->res['msg'] = 'Nombre de Producto repetido.';
+								}
+							} else {
+								$checkcode = DB::table($table)
+													->where('name', '=', $data['name'])
+													->where('name', '!=', $data['name'])
+													->get();
+								if( count($checkcode) == 0 ){
+									$product_id = DB::table($table)
+															->where('id', '=', $id)
+															->update($data);
+									$this->res['msg'] = 'Producto Vario Actualizado Correctamente.';
+									$this->res['status'] = true;
+								} else {
+									$this->res['msg'] = 'Nombre de Producto repetido.';
+								}
+							}
+							$this->ProductListInterface($type, $pag);
+						} else {
+							$this->res['data'] = $data;
+							$this->res['msg'] = 'Todos los campos son obligatorios.';
+						}
+					break;
 				default:
 						$this->res['msg'] = 'Caigo Aqui :(';
 					break;
@@ -461,7 +512,7 @@ class ProductController extends Controller {
 			switch ($type) {
 				case 'raw_material':
 					$l = DB::table('raw_material_products')
-							->select('raw_material_products.id', 'raw_material_products.technical_file', 'raw_material_products.code', 'raw_material_products.name', 'raw_material_products.max', 'raw_material_products.min', 'raw_material_products.unit', 'raw_material_products.description', 'providers.id AS provider_id', 'providers.name as provider_name', 'raw_material_products.technical_file')
+							->select('raw_material_products.id', 'raw_material_products.technical_file', 'raw_material_products.code', 'raw_material_products.name', 'raw_material_products.max', 'raw_material_products.min', 'raw_material_products.unit', 'raw_material_products.description', 'providers.id AS provider_id', 'providers.name as provider_name')
 							->join('providers', 'providers.id', '=', 'raw_material_products.provider_id')
 							->orderBy('id', 'desc')
 							->skip($offset)
@@ -525,6 +576,18 @@ class ProductController extends Controller {
 								->first();
 						$vl->finished_products_coatza = $fpc;
 					}
+					break;
+				case 'others_product':
+					$l = DB::table('others_products')
+							->select('others_products.id', 'others_products.name', 'others_products.unit', 'others_products.description', 'providers.id AS provider_id', 'providers.name as provider_name')
+							->join('providers', 'providers.id', '=', 'others_products.provider_id')
+							->orderBy('id', 'desc')
+							->skip($offset)
+							->take($rowsPerPage)
+							->get();
+
+					$total_rows = DB::table('others_products')
+										->count();
 					break;
 				default:
 					$this->res['msg'] = 'Caigo Aqui :(';

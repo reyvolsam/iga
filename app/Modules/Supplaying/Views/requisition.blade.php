@@ -152,9 +152,9 @@
 								<label for = "filter_product" class = "control-label">Tipo de Producto</label>
 								<select id = "filter_product" name = "filter_product" ng-model = "vm.requisition.filter_product" ng-change = "vm.ChangeFilterProduct();" class = "form-control">
 									<option value = "">Selecciona una Opción</option>
-									<option value = "raw_material">Materia prima</option>
+									<option value = "raw_material">Producto de Materia prima</option>
 									<option value = "finished_product">Productos Terminados</option>
-									<option value = "others">Varios</option>
+									<option value = "others">Productos Varios</option>
 								</select>
 							</div><!--/col-md-4-->
 							<div class="col-md-4">

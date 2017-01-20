@@ -51,12 +51,16 @@ function provider_init($http){
 		console.log(vm.provider);
 		$('#save_provider_btn').html('<i class="fa fa-spinner fa-spin fa-2x"></i>');
 		$('#save_provider_btn').attr('disabled', 'disabled');
+		vm.provider.pag = vm.page;
         $http.post('save', vm.provider)
             .success(function(res) {
             	console.log(res);
+            	vm.provider_list = {};
 				$('#save_provider_btn').html('Guardar Proveedor');
 				$('#save_provider_btn').removeAttr('disabled');
                 if(res.status){
+                	vm.provider_list = res.data;
+                	PageRender(res.tp);
                 	$('#provider_modal').modal('toggle');
                 	init_vars();
                 	$('#provider_list_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
@@ -216,6 +220,7 @@ function provider_init($http){
 	vm.EditProvider = function (cont)
 	{
 		$('#provider_modal').modal('toggle');
+		$('#provider_msg').html('');
 		console.log(vm.provider_list[cont]);
 		vm.provider.id = vm.provider_list[cont].id;
 

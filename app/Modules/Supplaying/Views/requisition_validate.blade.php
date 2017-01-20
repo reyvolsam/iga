@@ -135,9 +135,9 @@
 						</tbody>
 					</table>
 
-                  	<div class="progress xs">
-                    	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
-                  	</div><!---/progress-->
+        	<div class="progress xs">
+          	<div id = "progress_bar_file" class="progress-bar progress-bar-green"></div>
+        	</div><!---/progress-->
 
 				</div><!--/modal-body-->
 				<div id = "save_validate_pay_msg"></div><!-- requisition_list_msg-->

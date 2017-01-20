@@ -141,6 +141,7 @@
             <ul class="treeview-menu">
               <li><a href="{{URL::to('supplaying/provider/raw_material')}}"><span>Proveedor Materia Prima</span></a></li>
               <li><a href="{{URL::to('supplaying/provider/finished_provider')}}"><span>Proveedor Producto Terminado</span></a></li>
+              <li><a href="{{URL::to('supplaying/provider/others')}}"><span>Proveedores Varios</span></a></li>
             </ul>
           </li>
           @endif
@@ -179,6 +180,7 @@
               <li><a href="{{URL::to('supplaying/product/raw_material')}}"><span>Materia Prima</span></a></li>
               <li><a href="{{URL::to('supplaying/product/semifinished_product')}}"><span>Producto Semiterminado</span></a></li>
               <li><a href="{{URL::to('supplaying/product/finished_product')}}"><span>Producto Terminado</span></a></li>
+              <li><a href="{{URL::to('supplaying/product/others_product')}}"><span>Productos Varios</span></a></li>
             </ul>
           </li>
 

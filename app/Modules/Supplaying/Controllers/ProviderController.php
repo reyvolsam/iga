@@ -40,6 +40,8 @@ class ProviderController extends Controller {
 			if( \Sentry::check() ){
 				$type_provider = null;
 				$provider_id 			= $this->request->input('id');
+				$pag					= $this->request->input('pag');
+
 				$data['name'] 			= strtoupper( $this->request->input('name') );
 				$data['comercial'] 		= strtoupper( $this->request->input('comercial') );
 				$data['rfc'] 			= strtoupper( $this->request->input('rfc') );
@@ -58,7 +60,7 @@ class ProviderController extends Controller {
 				$data['notes'] 			= $this->request->input('notes');
 				$data['updated_at'] 	= date('Y-m-d h:m:i');
 				
-				$banks 					= $this->request->input('banks');
+				$banks 					= $this->request->input('banks')['list'];
 				$type_provider 			= $this->request->input('type');
 				
 
@@ -68,6 +70,9 @@ class ProviderController extends Controller {
 						break;
 					case 'finished_provider':
 							$data['provider_type_id'] = 3;
+						break;
+					case 'others':
+							$data['provider_type_id'] = 4;
 						break;
 					default:
 							$data['provider_type_id'] = '';
@@ -97,28 +102,27 @@ class ProviderController extends Controller {
 						(count($data['contacts']) <= 0) ? $data['contacts'] = '[]' : $data['contacts'] = json_encode($data['contacts']);
 						if($data['credit_limit'] == ''){$data['credit_limit'] = 0; }
 
-							if($provider_id == null){
-
-								$prfc = DB::table('providers')
+						if($provider_id == null){
+							$prfc = DB::table('providers')
 											->where('rfc', '=', $data['rfc'])
 											->where('provider_type_id', '=', $data['provider_type_id'])
 											->get();
 
-								if( count($prfc) == 0){
-									$idp = DB::table('providers')
-												->insertGetId($data);
-									foreach ($banks as $kb => $vb) {
-										DB::table('providers_banks')
-												->insert(array(
-														'bank_id' 		=> $vb['id'],
-														'provider_id'	=> $idp,
-														'no_count'		=> $vb['no_count'],
-														'inter_key'		=> $vb['inter_key'],
-														'branch_office'	=> $vb['branch_office'],
-														'type_coin'		=> $vb['type_coin']
-													));
-
+							if( count($prfc) == 0){
+								$idp = DB::table('providers')
+											->insertGetId($data);
+								foreach ($banks as $kb => $vb) {
+									DB::table('providers_banks')
+											->insert(array(
+													'bank_id' 		=> $vb['id'],
+													'provider_id'	=> $idp,
+													'no_count'		=> $vb['no_count'],
+													'inter_key'		=> $vb['inter_key'],
+													'branch_office'	=> $vb['branch_office'],
+													'type_coin'		=> $vb['type_coin']
+												));
 								}
+								$this->InterfacProviderList($type_provider, $pag);
 								$this->res['msg'] = 'Proveedor Guardado Correctamente.';
 								$this->res['status'] = true;
 							} else {
@@ -158,9 +162,11 @@ class ProviderController extends Controller {
 
 									}
 								}
+								$this->InterfacProviderList($type_provider, $pag);
 								$this->res['msg'] = 'Proveedor Actualizado Correctamente.';	
+								$this->res['status'] = true;
 							} else {
-								$this->res['msg'] = 'Este RFC ya esta registrado.222';
+								$this->res['msg'] = 'Este RFC ya esta registrado.';
 							}				
 						}
 					} else {
@@ -194,9 +200,9 @@ class ProviderController extends Controller {
 						$tp = 3;
 						$pn = 'Producto Terminado';
 					break;
-				case 'finished_product':
-						$tp = 3;
-						$pn = 'Producto Terminado';
+				case 'others':
+						$tp = 4;
+						$pn = 'Productos Varios';
 					break;
 				default:
 						$tp = '';
@@ -265,6 +271,9 @@ class ProviderController extends Controller {
 					break;
 				case 'finished_product':
 						$tp = 3;
+					break;
+				case 'others_product':
+						$tp = 4;
 					break;
 				default:
 						$tp = '';

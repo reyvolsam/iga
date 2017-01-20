@@ -10,6 +10,8 @@
 	    <li><a href="{{URL::to('/')}}"><i class="fa fa-dashboard"></i> Principal</a></li>
     	<li class = "active">Proveedores</a></li>
   	</ol>
+  	<br />
+  	<div class = "clearfix"></div>
 @stop
 
 @section('js')
@@ -564,7 +566,7 @@
 						</div><!-- termina panel -->
 					<div id = "provider_msg"></div>
 					<div class="modal-footer">			
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>					
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>					
 						<button type = "submit" class = "btn btn-success" id = "save_provider_btn">Guardar Proveedor</button>
 					</div><!--/modal-footer-->
 				</div><!--/modal-body-->

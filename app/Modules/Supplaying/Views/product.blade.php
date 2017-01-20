@@ -7,11 +7,14 @@
   	<h1>Productos<small>Producto Terminado</small></h1>
   	@elseif($product_type == 'semifinished_product')
   	<h1>Productos<small>Producto Semiterminado</small></h1>
+	@elseif($product_type == 'others_product')
+	<h1>Productos<small>Productos Varios</small></h1>
   	@endif
   	<ol class="breadcrumb">
 	    <li><a href="{{URL::to('/')}}"><i class="fa fa-dashboard"></i> Principal</a></li>
     	<li class = "active">Productos</a></li>
   	</ol>
+  	<br />
 @stop
 
 @section('js')
@@ -34,6 +37,8 @@
 		<button type="button" class="btn btn-box-tool" data-toggle="modal" data-target="#semifinished_product_modal"><i class="fa fa-plus"></i> Producto Semiterminado</button>
 	@elseif($product_type == 'finished_product')
 		<button type="button" class="btn btn-box-tool" data-toggle="modal" data-target="#finished_product_modal"><i class="fa fa-plus"></i> Producto Terminado</button>
+	@elseif($product_type == 'others_product')
+		<button type="button" class="btn btn-box-tool" data-toggle="modal" data-target="#others_product_modal"><i class="fa fa-plus"></i> Productos Varios</button>
 	@endif
       	<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
       	<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
@@ -70,7 +75,6 @@
 			</tr>
 		</tbody>
 	</table>
-	<i  id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	@endif
 	@if($product_type == 'semifinished_product')
 	<table class = "table table-bordered table-hover">
@@ -104,7 +108,6 @@
 			</tr>
 		</tbody>
 	</table>
-	<i  id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	@endif
 	@if($product_type == 'finished_product')
 	<table class = "table table-bordered table-hover">
@@ -132,8 +135,33 @@
 			</tr>
 		</tbody>
 	</table>
-	<i  id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	@endif
+	@if($product_type == 'others_product')
+	<table class = "table table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>Producto</th>
+				<th>Descripción</th>
+				<th>Unidad</th>
+				<th>Proveedor</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody ng-repeat="elem in vm.product_list">
+			<tr>
+				<td>@{{elem.name}}</td>
+				<td>@{{elem.description}}</td>
+				<td>@{{elem.unit}}</td>
+				<td>@{{elem.provider_name}}</td>
+				<td>  
+					<button class = "btn btn-info btn-xs" ng-click = "vm.EditProduct($index)" ><i class = "fa fa-edit"></i></button>
+					<button class = "btn btn-danger btn-xs" ng-click = "vm.DeleteProduct($index)" ><i class = "fa fa-trash"></i></button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	@endif
+	<i id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	</div><!--/box-body-->
 	<div class = "box-footer">
 		<ul class = "pagination pull-right"></ul><!--/pagination-->
@@ -541,6 +569,52 @@
 		</div><!--/modal-content-->
 	</div><!--/modal-dialog-->
 </div><!--/modal-->
+@endif
+@if($product_type == 'others_product')
+<div class="modal fade" id = "others_product_modal" tabindex = "-1" role="dialog" aria-labelledby="others_product_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Productos Varios</h4>
+			</div>
+			<form method = "post" ng-submit = "vm.SaveProductOthers();">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="name" class="control-label">Producto</label>
+						<input type = "text" class = "form-control" id = "name" name = "name" ng-model = "vm.product.name" placeholder = "Nombre del Producto" />
+					</div><!--/form-group-->
+					<div class="form-group" ng-init = "vm.GetProviderList();">
+						<label for = "provider" class="control-label">Proveedor</label>
+						<i id = "select_provider" class = "fa fa-spinner fa-spin fa-1x"></i>
+						<select id = "provider" name = "provider" ng-model = "vm.product.provider_id" class = "form-control" ng-options = "p_list.id as p_list.name for p_list in vm.provider_list">
+							<option value = "">Seleccione una Opción...</option>
+						</select>
+					</div><!--/form-group-->
+					<div class="form-group">
+						<label for = "unidad" class="control-label">Unidad</label>
+							<select id = "unidad" name = "unidad" class = "form-control" ng-model = "vm.product.unit">
+								<option value = "">Seleccione una Opción</option>
+								<option value = "Pieza">Pieza</option>
+								<option value = "Cm.">Cm.</option>
+								<option value = "Mtrs.">Mtrs.</option>
+								<option value = "Kg.">Kg.</option>
+								<option value = "Ln">Ln.</option>
+							</select>
+					</div><!--/form-group-->
+					<div class="form-group">
+						<label for = "descripcion" class="control-label">Descripción</label>
+						<textarea class="form-control" rows="5" id = "descripcion" name = "descripcion" ng-model = "vm.product.description"></textarea>
+					</div><!--/form-group-->
+					<div id = "save_product_msg"></div><!--/product_msg-->
+					<div class="modal-footer">			
+						<button type="button" class="btn btn-danger" id = "close_btn_product" ng-click = "vm.CloseSaveProduct();" data-dismiss="modal">Cerrar</button>
+						<button type = "submit" class = "btn btn-success" id = "save_product_btn">Guardar Producto</button>
+					</div><!--/footer-->
+				</div><!--/modal-body-->
+			</form>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 @endif
 
 @stop

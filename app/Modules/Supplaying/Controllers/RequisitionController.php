@@ -70,6 +70,9 @@ class RequisitionController extends Controller {
 						$msg = 'No hay Productos de Producto Terminado.';
 					break;
 				case 'others':
+						$pl = DB::table('others_products')
+									->select('id', 'description', 'unit')
+									->get();
 						$msg = 'No hay Productos Varios.';
 					break;
 				default:
