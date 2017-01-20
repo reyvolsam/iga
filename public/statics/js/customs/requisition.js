@@ -705,77 +705,126 @@ function requisition_init($http){
 
   	vm.EditProductPieces = function (ind)
   	{
+  		vm.ind_item = null;
   		vm.money_type = null;
   		vm.dollar_value = null;
   		vm.dollar_price = null;
   		vm.pesos_price = null;
   		vm.importe = null;
+  		vm.pieces = null;
+  		vm.ind_item = ind;
   		if(vm.requisition.id != null){
   			if(vm.requisition_list[vm.ind].pre_order == 0){
-  				console.log(vm.requisition_list[vm.ind].products[ind]);
   				vm.money_type = vm.requisition_list[vm.ind].products[ind].money_type;
-  			}
-  		}
-  		$('#EditProductListModal').modal('toggle');
-  		/*if(vm.requisition.id != null){
-			var msg = 'Introduza un Número Valido.';
-	  		if(vm.requisition_list[vm.ind].pre_order == 0){
-	  			var n = prompt('Cambiar Número de Piezas', '');
-	  			if( n != null){
-	  				if(is_number(n) == true){
-	  					$('#edit_product_msg').html('');
-						vm.requisition_list[vm.ind].products[ind].product_pieces = n;
-						vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
-						console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
-						CalculateTotal();
-						CalculateIVA();
-	  				} else {
-	  					$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
-	  				}
-	  			}/* else {
-	  				$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
-	  			}*
-		  	}
-  		} else {
-  			console.log('crear servicio');
-  			console.log(vm.products_list[ind]);
-  			var n = prompt('Cambiar Número de Piezas', '');
-  			if( n != null){
-  				if(is_number(n) == true){
-  					$('#edit_product_msg').html('');
-					vm.products_list[ind].product_pieces = n;
-					vm.products_list[ind].importe = parseInt(vm.products_list[ind].product_pieces) * parseFloat(vm.products_list[ind].pesos_price);
-					//console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
-					CalculateTotal();
-					CalculateIVA();
+  				ChangeMoneyTypeEdit();
+  				if(vm.requisition_list[vm.ind].product_type == 'service'){
+  					$('#pieces_edit').attr('disabled', 'disabled');
   				} else {
-  					$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
+  					$('#pieces_edit').removeAttr('disabled');
+  				}
+  				vm.pieces = vm.requisition_list[vm.ind].products[ind].product_pieces;
+  				if(vm.money_type == 'USD'){
+  					vm.dollar_value = vm.requisition_list[vm.ind].products[ind].dollar_value;
+  					vm.dollar_price = vm.requisition_list[vm.ind].products[ind].dollar_price;
+  					vm.pesos_price = vm.requisition_list[vm.ind].products[ind].pesos_price;
+  					vm.importe = vm.requisition_list[vm.ind].products[ind].importe;
+  				}
+  				if(vm.money_type == 'MX'){
+  					vm.pesos_price = vm.requisition_list[vm.ind].products[ind].pesos_price;
+  					vm.importe = vm.requisition_list[vm.ind].products[ind].importe;
   				}
   			}
-  		}*/
+  		} else {
+			vm.money_type = vm.products_list[ind].money_type;
+			ChangeMoneyTypeEdit();
+			if(vm.products_list[ind].product_type == 'service'){
+				$('#pieces_edit').attr('disabled', 'disabled');
+			} else {
+				$('#pieces_edit').removeAttr('disabled');
+			}
+			vm.pieces = vm.products_list[ind].product_pieces;
+			if(vm.money_type == 'USD'){
+				vm.dollar_value = vm.products_list[ind].dollar_value;
+				vm.dollar_price = vm.products_list[ind].dollar_price;
+				vm.pesos_price = vm.products_list[ind].pesos_price;
+				vm.importe = vm.products_list[vm.ind].importe;
+			}
+			if(vm.money_type == 'MX'){
+				vm.pesos_price = vm.products_list[ind].pesos_price;
+				vm.importe = vm.products_list[ind].importe;
+			}
+  		}
+  		$('#EditProductListModal').modal('toggle');
   	}//vm.EditProductPieces
 
-  	vm.ChangeMoneyTypeEdit = function ()
+  	
+	$('#EditProductListModal').on('hidden.bs.modal', function (e) {
+
+	});
+
+	vm.ChangePiecesEdit = function ()
+	{
+		if(vm.money_type == 'USD'){
+			vm.importe = vm.pieces * vm.pesos_price;
+		}
+		if(vm.money_type == 'MX'){
+			vm.importe = vm.pieces * vm.pesos_price;
+		}
+	}//vm.ChangePiecesEdit()
+
+  	function ChangeMoneyTypeEdit()
   	{
 		if(vm.money_type == 'USD'){
 			$('#pesos_price_edit_div').show();
 			$('#importe_edit_div').show();
 			$('#dollar_value_edit').show();
 			$('#dollar_price_edit_div').show();
-			$('#pesos_price').attr('disabled', 'disabled');
+			$('#pesos_price_edit').attr('disabled', 'disabled');
+
+			vm.dollar_value = 0;
+			vm.dollar_price = 0;
+			vm.pesos_price = 0;
+			vm.importe = 0;
+
 		} else if(vm.money_type == 'MX'){
 			$('#pesos_price_edit_div').show();
 			$('#importe_edit_div').show();
 			$('#dollar_value_edit').hide();
 			$('#dollar_price_edit_div').hide();
 			$('#pesos_price_edit').removeAttr('disabled');
+			
+			vm.pesos_price = 0;
+			vm.importe = 0;
 		} else {
 			$('#pesos_price_edit_div').hide();
 			$('#importe_edit_div').hide();
 			$('#dollar_value_edit').hide();
 			$('#dollar_price_edit_div').hide();
 		}
+  	}//ChangeMoneyTypeEdit
+
+  	vm.ChangeMoneyTypeEdit = function ()
+  	{
+  		ChangeMoneyTypeEdit();
   	}//vm.ChangeMoneyTypeEdit
+
+  	vm.ChangeDollarValueEdit = function ()
+  	{
+  		vm.pesos_price = vm.dollar_value * vm.dollar_price;
+		vm.importe = vm.pieces * vm.pesos_price;
+
+  	}//vm.ChangeDollarValueEdit
+
+  	vm.ChangeDollarPriceEdit = function ()
+  	{
+  		vm.pesos_price = vm.dollar_value * vm.dollar_price;
+		vm.importe = vm.pieces * vm.pesos_price;
+  	}//vm.ChangeDollarPriceEdit
+
+  	vm.ChangePesosPriceEdit = function ()
+  	{
+  		vm.importe = vm.pieces * vm.pesos_price;
+  	}//vm.ChangePesosPriceEdit
 
   	vm.DeleteProductPieces = function ($index)
   	{
@@ -786,6 +835,49 @@ function requisition_init($http){
 	  		}
   		}
   	}//vm.DeleteProductPieces
+
+  	vm.SubmitEditProductItem = function ()
+  	{
+  		if(vm.requisition.id != null){
+  			if(vm.requisition_list[vm.ind].pre_order == 0){
+  				console.log(vm.ind_item);
+  				vm.requisition_list[vm.ind].products[vm.ind_item].money_type = vm.money_type;
+  				vm.requisition_list[vm.ind].products[vm.ind_item].product_pieces = vm.pieces;
+  				if(vm.money_type == 'USD'){
+  					vm.requisition_list[vm.ind].products[vm.ind_item].dollar_value = vm.dollar_value;
+  					vm.requisition_list[vm.ind].products[vm.ind_item].dollar_price = vm.dollar_price;
+  					vm.requisition_list[vm.ind].products[vm.ind_item].pesos_price = vm.pesos_price;
+  					vm.requisition_list[vm.ind].products[vm.ind_item].importe = vm.importe;
+  				}
+  				if(vm.money_type == 'MX'){
+  					vm.requisition_list[vm.ind].products[vm.ind_item].pesos_price = vm.pesos_price;
+  					vm.requisition_list[vm.ind].products[vm.ind_item].importe = vm.importe;
+  				}
+  			}
+  		} else {
+  				vm.products_list[vm.ind_item].money_type = vm.money_type;
+  				vm.products_list[vm.ind_item].product_pieces = vm.pieces;
+  				if(vm.money_type == 'USD'){
+  					vm.products_list[vm.ind_item].dollar_value = vm.dollar_value;
+  					vm.products_list[vm.ind_item].dollar_price = vm.dollar_price;
+  					vm.products_list[vm.ind_item].pesos_price = vm.pesos_price;
+  					vm.products_list[vm.ind_item].importe = vm.importe;
+  				}
+  				if(vm.money_type == 'MX'){
+  					vm.products_list[vm.ind_item].pesos_price = vm.pesos_price;
+  					vm.products_list[vm.ind_item].importe = vm.importe;
+  				}
+  		}
+		vm.ind_item = null;
+		vm.pieces = null;
+		vm.money_type =  null;
+		vm.dollar_value = null;
+		vm.dollar_price = null;
+		vm.pesos_price = null;
+		vm.importe = null;
+  		CalculateTotal();
+  		$('#EditProductListModal').modal('toggle');
+  	}//vm.EditProductItem
 
   	vm.CancelRequisition = function ()
   	{

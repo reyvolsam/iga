@@ -291,7 +291,7 @@
 								<td>@{{ elem.pesos_price | currency }}</td>
 								<td>@{{ elem.importe | currency }}</td>
 								<td>
-								<!--<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button> -->
+								<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button>
 								<button type = "button" class = "btn_delete_pieces btn btn-danger btn-xs" ng-click = "vm.DeleteProductPieces($index);"><i class = "fa fa-trash"></i></button>
 								</td>
 							</tr>
@@ -415,51 +415,58 @@
 				<h4 class="modal-title" id="myModalLabel">Modificar Producto</h4>
 			</div><!--/modal-header-->
       		<div class="modal-body">
-					<div class="panel panel-default" id = "finances_info_edit">
-						<div class="panel-heading">Información Financiera</div>
-					 	<div class="panel-body">
-					 		<div class="col-md-4">
-								<label for = "money_type_edit" class = "control-label">Tipo de moneda</label>
-								<select class = "form-control" id = "money_type_edit" name = "money_type_edit" ng-model = "vm.money_type" ng-change = "vm.ChangeMoneyTypeEdit();">
-									<option value = "">Selecciona una Opción...</option>
-									<option value = "USD">USD</option>
-									<option value = "MX">MX</option>
-								</select>
-							</div><!--/col-md-4-->
-							<div class="col-md-4" id = "dollar_value_edit">
-								<label for = "dollar_value_edit" class = "control-label">Tipo de Cambio</label>
-								<div class="input-group">
-									<div class="dolar_sign input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "dollar_value_edit" name = "dollar_value_edit" ng-change = "vm.ChangeDollarValueEdit();" ng-model = "vm.dollar_value" placeholder = "Tipo de Cambio" />
-								</div>
+				<div class="col-md-4">
+					<label for = "pieces_edit" class = "control-label">Piezas</label>
+					<input type = "number" class = "form-control" id = "pieces_edit" name = "pieces_edit" ng-change = "vm.ChangePiecesEdit();" ng-model = "vm.pieces" placeholder = "Piezas" />
+				</div><!--/col-md-4-->
+				<div class = "clearfix"></div><!--/clearfix-->
+				<br />
+				<br />
+				<div class="panel panel-default" id = "finances_info_edit">
+					<div class="panel-heading">Información Financiera</div>
+				 	<div class="panel-body">
+				 		<div class="col-md-4">
+							<label for = "money_type_edit" class = "control-label">Tipo de moneda</label>
+							<select class = "form-control" id = "money_type_edit" name = "money_type_edit" ng-model = "vm.money_type" ng-change = "vm.ChangeMoneyTypeEdit();">
+								<option value = "">Selecciona una Opción...</option>
+								<option value = "USD">USD</option>
+								<option value = "MX">MX</option>
+							</select>
+						</div><!--/col-md-4-->
+						<div class="col-md-4" id = "dollar_value_edit">
+							<label for = "dollar_value_edit" class = "control-label">Tipo de Cambio</label>
+							<div class="input-group">
+								<div class="dolar_sign input-group-addon">$</div>
+								<input type = "text" class = "form-control" id = "dollar_value_edit" name = "dollar_value_edit" ng-change = "vm.ChangeDollarValueEdit();" ng-model = "vm.dollar_value" placeholder = "Tipo de Cambio" />
 							</div>
-							<div class="col-md-4" id = "dollar_price_edit_div">
-								<label for = "dollar_price_edit" class = "control-label">Precio Unitario en Dolares</label>
-								<div class="input-group">
-									<div class="dolar_sign input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "dollar_price_edit" name = "dollar_price_edit" ng-change = "vm.ChangeDollarPriceEdit();" ng-model = "vm.dollar_price" placeholder = "Precio Unitario en Dolar" />
-								</div>
-							</div>	
-							<div class="col-md-4" id = "pesos_price_edit_div">
-								<label for = "pesos_price_edit" class = "control-label">Precio Unitario en Pesos</label>
-								<div class="input-group">
-									<div class="input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "pesos_price_edit" name = "pesos_price_edit" ng-model = "vm.pesos_price" ng-change = "vm.ChangePesosPriceEdit();" placeholder = "Precio en Pesos" />
-								</div>
-							</div>					
-							<div class="col-md-4" id = "importe_edit_div">
-								<label for = "importe_edit" class = "control-label">Importe (MX) </label>
-								<div class="input-group">
-									<div class="input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "importe_edit" name = "importe_edit" ng-model = "vm.importe" placeholder = "Importe" readonly />
-								</div>
+						</div>
+						<div class="col-md-4" id = "dollar_price_edit_div">
+							<label for = "dollar_price_edit" class = "control-label">Precio Unitario en Dolares</label>
+							<div class="input-group">
+								<div class="dolar_sign input-group-addon">$</div>
+								<input type = "text" class = "form-control" id = "dollar_price_edit" name = "dollar_price_edit" ng-change = "vm.ChangeDollarPriceEdit();" ng-model = "vm.dollar_price" placeholder = "Precio Unitario en Dolar" />
 							</div>
-						</div><!-- termina panel-body -->
-					</div><!-- termina panel -->
+						</div>	
+						<div class="col-md-4" id = "pesos_price_edit_div">
+							<label for = "pesos_price_edit" class = "control-label">Precio Unitario en Pesos</label>
+							<div class="input-group">
+								<div class="input-group-addon">$</div>
+								<input type = "text" class = "form-control" id = "pesos_price_edit" name = "pesos_price_edit" ng-model = "vm.pesos_price" ng-change = "vm.ChangePesosPriceEdit();" placeholder = "Precio Unitario en Pesos" />
+							</div>
+						</div>					
+						<div class="col-md-4" id = "importe_edit_div">
+							<label for = "importe_edit" class = "control-label">Importe (MX) </label>
+							<div class="input-group">
+								<div class="input-group-addon">$</div>
+								<input type = "text" class = "form-control" id = "importe_edit" name = "importe_edit" ng-model = "vm.importe" placeholder = "Importe" readonly />
+							</div>
+						</div>
+					</div><!-- termina panel-body -->
+				</div><!-- termina panel -->
       		</div><!--modal-body-->
       		<div class="modal-footer">
-        		<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-        		<button type="button" class="btn btn-primary">Cambiar</button>
+        		<button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+        		<button type="button" class="btn btn-default" ng-click = "vm.SubmitEditProductItem();">Editar Producto</button>
       		</div><!--/modal-footer-->
     	</div><!--/modal-content-->
   	</div><!--modal-dialog-->
