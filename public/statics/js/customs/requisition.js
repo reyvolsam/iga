@@ -39,6 +39,8 @@ function requisition_init($http){
 	vm.notification = '';
 	vm.notification_list = Array();
 
+	$('#notification_div').hide();
+
 	function Finances_Init()
 	{
 		vm.finances = {};
@@ -66,6 +68,11 @@ function requisition_init($http){
 		vm.product.new.description = null;
 		vm.product.new.use = null;
 		vm.product.new.pieces = null;
+
+		vm.product.service = {};
+		vm.product.service.name = null;
+		vm.product.service.description = null;
+		vm.product.service.pieces = null;
 	}
 	$('#requisition_list_loader').hide();
 
@@ -74,6 +81,7 @@ function requisition_init($http){
 
 	$('#catalog_product_div').hide();
 	$('#new_product_div').hide();
+	$('#service_div').hide();
 
 	$('#select_product').hide();
 
@@ -189,14 +197,22 @@ function requisition_init($http){
 	{
 		if(vm.requisition.product_type == 'catalog'){
 			$('#catalog_product_div').show();
+			$('#service_div').hide();
 			$('#new_product_div').hide();
 		} else if(vm.requisition.product_type == 'no_catalog'){
 			$('#new_product_div').show();
 			$('#catalog_product_div').hide();
+			$('#service_div').hide();
+			$('#product_msg').html('');
+		} else if(vm.requisition.product_type == 'service'){
+			$('#service_div').show();
+			$('#catalog_product_div').hide();
+			$('#new_product_div').hide();
 			$('#product_msg').html('');
 		} else {
 			$('#catalog_product_div').hide();
 			$('#new_product_div').hide();
+			$('#service_div').show();
 		}
 		$('#pesos_price_div').hide();
 		$('#importe_div').hide();
@@ -292,22 +308,6 @@ function requisition_init($http){
 		vm.finances.pesos_price = 0;
 	}//vm.ChangeMoneyType()
 
-	vm.ChangeDollarValue = function ()
-	{
-		var r = CheckProduct();
-		if( r == true ){
-			$('#product_msg').html('');
-			if( vm.finances.dollar_value > 0 ){
-				//alert('mayor a 0');
-			} else {
-				vm.finances.dollar_value = 0;
-			}
-		} else {
-			$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Todos los Campos del Producto deben de estar llenos</div>');
-			vm.finances.dollar_value = 0;
-		}
-	}//vm.ChangeDollarValue()
-
 	function CheckProduct()
 	{
 
@@ -347,9 +347,39 @@ function requisition_init($http){
 					return true
 				}
 			}
+		} else if(vm.requisition.product_type == 'service'){
+			if( vm.product.service.name == null
+					|| vm.product.service.description == null){
+				return false;
+			} else {
+				return true;
+			}
 		}
 		
 	}//CheckProduct
+
+	vm.ChangeDollarValue = function ()
+	{
+		var r = CheckProduct();
+		if( r == true ){
+			console.log('changeDV');
+			$('#product_msg').html('');
+			if( vm.finances.dollar_value > 0 ){
+				/*pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
+				vm.finances.pesos_price = pmx.toFixed(2);
+				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.catalog.pieces);
+				vm.finances.importe = parseFloat(importe);*/
+				console.log('entro');
+				CalculateImport();
+				//alert('mayor a 0');
+			} else {
+				vm.finances.dollar_value = 0;
+			}
+		} else {
+			$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Todos los Campos del Producto deben de estar llenos</div>');
+			vm.finances.dollar_value = 0;
+		}
+	}//vm.ChangeDollarValue()
 
 	vm.ChangeDollarPrice = function ()
 	{
@@ -360,9 +390,10 @@ function requisition_init($http){
 		if( vm.requisition.product_type == 'catalog' ){
 			if( is_number( vm.product.catalog.pieces ) == true ){
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
-				vm.finances.pesos_price = pmx;
+				vm.finances.pesos_price = pmx.toFixed(2);
 				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.catalog.pieces);
 				vm.finances.importe = parseFloat(importe);
+				//CalculateImport();
 				$('#add_product_item_btn').removeAttr('disabled');
 				$('#product_msg').html('');
 			} else {
@@ -373,15 +404,25 @@ function requisition_init($http){
 		if( vm.requisition.product_type == 'no_catalog' ){
 			if( is_number( vm.product.new.pieces ) == true ){
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
-				vm.finances.pesos_price = pmx;
+				vm.finances.pesos_price = pmx.toFixed(2);
 				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.new.pieces);
 				vm.finances.importe = parseFloat(importe);
+				//CalculateImport();
 				$('#add_product_item_btn').removeAttr('disabled');
 				$('#product_msg').html('');
 			} else {
 				$('#add_product_item_btn').attr('disabled', 'disabled');
 				$('#product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
 			}
+		}
+		if(vm.requisition.product_type == 'service'){
+			pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
+			vm.finances.pesos_price = pmx.toFixed(2);
+			importe = parseFloat(vm.finances.pesos_price);
+			vm.finances.importe = parseFloat(importe);
+			//CalculateImport();
+			$('#add_product_item_btn').removeAttr('disabled');
+			$('#product_msg').html('');
 		}
 	}//vm.ChangeDollarPrice
 
@@ -419,6 +460,9 @@ function requisition_init($http){
 				}
 			}
 		}
+		if(vm.requisition.product_type == 'service'){
+			importe = vm.finances.pesos_price;
+		}
 
 		vm.finances.importe = parseFloat(importe);
 	}//vm.ChangePesosPrice
@@ -444,6 +488,9 @@ function requisition_init($http){
 		if( vm.requisition.product_type == 'no_catalog' ){
 			CalculateImport();
 		}
+		if( vm.requisition.product_type == 'service' ){
+			CalculateImport();
+		}
 	}//vm.ChangePiecesNew
 
 	function CalculateImport()
@@ -466,11 +513,20 @@ function requisition_init($http){
 				ban = true;
 			}
 		}
-		if(ban = true){
+		if( vm.requisition.product_type == 'service' ){
+			vm.product.service.pieces = 1;
+			pieces = vm.product.service.pieces;
+			console.log('entro2: '+pieces);
+			ban = true;
+		}
+		if(ban == true){
+			console.log('entro 3');
 			if(vm.finances.money_type == 'USD'){
+				console.log('entro 4');
 				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
 				vm.finances.pesos_price = pmx;
 			}
+			console.log('importe: '+importe);
 			importe = parseFloat(vm.finances.pesos_price) * parseInt(pieces);
 			vm.finances.importe = importe;
 			$('#add_product_item_btn').removeAttr('disabled');
@@ -524,6 +580,17 @@ function requisition_init($http){
 				aux.dollar_price 		= vm.finances.dollar_price;
 				aux.pesos_price 		= vm.finances.pesos_price;
 				aux.importe 			= vm.finances.importe;
+			}
+			if(vm.requisition.product_type == 'service'){
+				aux.product_id 				= null;
+				aux.product_name 			= vm.product.service.name;
+				aux.product_description 	= vm.product.service.description;
+				aux.product_pieces 			= vm.product.new.pieces;
+				aux.money_type 				= vm.finances.money_type;
+				aux.dollar_value 			= vm.finances.dollar_value;
+				aux.dollar_price 			= vm.finances.dollar_price;
+				aux.pesos_price 			= vm.finances.pesos_price;
+				aux.importe 				= vm.finances.importe;
 			}
 			vm.products_list.push(aux);
 			Product_Init();
@@ -591,6 +658,7 @@ function requisition_init($http){
   	vm.EditRequisition = function (ind)
   	{
   		vm.ind = ind;
+  		$('#notification_div').show();
   		console.log(vm.requisition_list[ind].id);
   		vm.requisition.id = vm.requisition_list[ind].id;
   		vm.requisition.requested_date = vm.requisition_list[ind].requested_date;
@@ -637,26 +705,77 @@ function requisition_init($http){
 
   	vm.EditProductPieces = function (ind)
   	{
-  		if(vm.requisition_list[vm.ind].pre_order == 0){
+  		vm.money_type = null;
+  		vm.dollar_value = null;
+  		vm.dollar_price = null;
+  		vm.pesos_price = null;
+  		vm.importe = null;
+  		if(vm.requisition.id != null){
+  			if(vm.requisition_list[vm.ind].pre_order == 0){
+  				console.log(vm.requisition_list[vm.ind].products[ind]);
+  				vm.money_type = vm.requisition_list[vm.ind].products[ind].money_type;
+  			}
+  		}
+  		$('#EditProductListModal').modal('toggle');
+  		/*if(vm.requisition.id != null){
+			var msg = 'Introduza un Número Valido.';
+	  		if(vm.requisition_list[vm.ind].pre_order == 0){
+	  			var n = prompt('Cambiar Número de Piezas', '');
+	  			if( n != null){
+	  				if(is_number(n) == true){
+	  					$('#edit_product_msg').html('');
+						vm.requisition_list[vm.ind].products[ind].product_pieces = n;
+						vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
+						console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
+						CalculateTotal();
+						CalculateIVA();
+	  				} else {
+	  					$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
+	  				}
+	  			}/* else {
+	  				$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
+	  			}*
+		  	}
+  		} else {
+  			console.log('crear servicio');
+  			console.log(vm.products_list[ind]);
   			var n = prompt('Cambiar Número de Piezas', '');
-  			console.log(n.length);
-  			var msg = 'Introduza un Número Valido.';
-  			if( n.length != 0){
+  			if( n != null){
   				if(is_number(n) == true){
   					$('#edit_product_msg').html('');
-					vm.requisition_list[vm.ind].products[ind].product_pieces = n;
-					vm.requisition_list[vm.ind].products[ind].importe = parseInt(vm.requisition_list[vm.ind].products[ind].product_pieces) * parseFloat(vm.requisition_list[vm.ind].products[ind].pesos_price);
-					console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
+					vm.products_list[ind].product_pieces = n;
+					vm.products_list[ind].importe = parseInt(vm.products_list[ind].product_pieces) * parseFloat(vm.products_list[ind].pesos_price);
+					//console.log(vm.requisition_list[vm.ind].products[ind].product_pieces);
 					CalculateTotal();
 					CalculateIVA();
   				} else {
   					$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
   				}
-  			} else {
-  				$('#edit_product_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+msg+'</div>');
   			}
-  		}
+  		}*/
   	}//vm.EditProductPieces
+
+  	vm.ChangeMoneyTypeEdit = function ()
+  	{
+		if(vm.money_type == 'USD'){
+			$('#pesos_price_edit_div').show();
+			$('#importe_edit_div').show();
+			$('#dollar_value_edit').show();
+			$('#dollar_price_edit_div').show();
+			$('#pesos_price').attr('disabled', 'disabled');
+		} else if(vm.money_type == 'MX'){
+			$('#pesos_price_edit_div').show();
+			$('#importe_edit_div').show();
+			$('#dollar_value_edit').hide();
+			$('#dollar_price_edit_div').hide();
+			$('#pesos_price_edit').removeAttr('disabled');
+		} else {
+			$('#pesos_price_edit_div').hide();
+			$('#importe_edit_div').hide();
+			$('#dollar_value_edit').hide();
+			$('#dollar_price_edit_div').hide();
+		}
+  	}//vm.ChangeMoneyTypeEdit
 
   	vm.DeleteProductPieces = function ($index)
   	{
@@ -670,10 +789,22 @@ function requisition_init($http){
 
   	vm.CancelRequisition = function ()
   	{
-  		if(vm.requisition.id != null){
-  			vm.requisition.id = null;
- 			RequisitionList();
-  		}
+  		$('#notification_div').hide();
+  		vm.requisition.id = null;
+	    
+	    vm.requisition_list = {};
+		vm.requisition = {};
+		vm.requisition.id = null;
+		vm.requisition.subtotal = 0;
+		vm.requisition.iva = 0;
+		vm.requisition.total = 0;
+
+		vm.products_list = Array();
+		vm.product_list_select = {};
+
+		Product_Init();
+		Finances_Init();
+ 		RequisitionList();
   	}//CancelRequisition()
 
   	vm.DeleteRequisition = function (ind)

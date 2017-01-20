@@ -409,7 +409,7 @@ class RequisitionController extends Controller {
 	{
 		try{
 			$p = DB::table('providers')
-					->where('provider_type_id', '=', 1)
+					//->where('provider_type_id', '=', 1)
 					->get();
 			if( count($p) > 0 ){
 				$this->res['data'] = $p;
@@ -542,29 +542,37 @@ class RequisitionController extends Controller {
 	 								->update(array(
 	 										'ticket_pay_file' => $actual_image_name
 	 									));
-	 						/*$rq = DB::table('requisitions')
+	 						$rq = DB::table('requisitions')
 	 									->where('id', '=', $id)
 	 									->first();
 
 							$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
 							$rq->provider_email 	= json_decode($rq->provider_email);
+							$pathToFile 			= 'order_buy_ticket/'.$rq->ticket_pay_file;
+
+							$user = \Sentry::getUser();
 
 							foreach ($rq->provider_email as $kpe => $vpe) {
 								try{
-								Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
-						            $m->from('', 'Your Application');
+									Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($vpe, $pathToFile, $user) {
+							            $m->from($user->email, 'Orden de Compra Pagada Correctamente.');
+										$m->attach($pathToFile, ['as' => 'Orden de Compra', 'mime' => 'OC']);
+							            $m->to($vpe->email, $vpe->name)->subject('Orden de Compra Pagada Correctamente.');
+							        });
+							        $vpe->sended = 1;
 
-						            $m->to($user->email, $user->name)->subject('Your Reminder!');
-						        });
-						        $vpe->sended = 1;
 								} catch (\Exception $e) {
 									$vpe->msg = 'El Correo Electronico no se pudo enviar.';
 									$vpe->sended = 0;
 								}
-							}*/
+							}
+							$rq->provider_email = json_encode($rq->provider_email); 
+							DB::table('requisitions')
+									->where('id', '=', $id)
+									->update(['provider_email' => $rq->provider_email]);
 
 							$this->res['status'] = true;
-							$this->res['msg'] = 'Boucher de Requisición Subida Correctamente.';
+							$this->res['msg'] = 'Boucher de Orden de Compra Subida Correctamente.';
 						}
 					} catch (\Exception $e) {
 						$this->res['msg'] = 'Error en la Base de Datos.'.$e;
@@ -651,26 +659,27 @@ class RequisitionController extends Controller {
 	{
 		try{
 			$user = \Sentry::getUser();
-	 						$rq = DB::table('requisitions')
-	 									->where('id', '=', 8)
-	 									->first();
+			$rq = DB::table('requisitions')
+							->where('id', '=', 8)
+							->first();
 
-							$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
-							$rq->provider_email 	= json_decode($rq->provider_email);
-							$pathToFile = 'order_buy_ticket/251_1483780146.png';
-							foreach ($rq->provider_email as $kpe => $vpe) {
-								try{
-								Mail::send('emails.order_buy', ['user' => $user], function ($m, $pathToFile, $vps) use ($user, $pathToFile, $v) {
-						            $m->from($user->email, 'Orden de Compra Pagada Correctamente.');
-									$m->attach($pathToFile, ['as' => 'Orden de Compra', 'mime' => 'OC']);
-						            $m->to($v->email, $user->name)->subject('Orden de Compra Pagada Correctamente.');
-						        });
-						        $vpe->sended = 1;
-								} catch (\Exception $e) {
-									$vpe->msg = 'El Correo Electronico no se pudo enviar.';
-									$vpe->sended = 0;
-								}
-							}
+			$rq->provider_email 	= str_replace("'", '"', $rq->provider_email);
+			$rq->provider_email 	= json_decode($rq->provider_email);
+			$pathToFile = 'order_buy_ticket/251_1483780146.png';
+			foreach ($rq->provider_email as $kpe => $vpe) {
+				try{
+					Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($vpe, $pathToFile, $user) {
+			            $m->from($user->email, 'Orden de Compra Pagada Correctamente.');
+						$m->attach($pathToFile, ['as' => 'Orden de Compra', 'mime' => 'OC']);
+			            $m->to($vpe->email, $vpe->name)->subject('Orden de Compra Pagada Correctamente.');
+			        });
+			        $vpe->sended = 1;
+				} catch (\Exception $e) {
+					echo $e;
+					$vpe->msg = 'El Correo Electronico no se pudo enviar.';
+					$vpe->sended = 0;
+				}
+			}
 				/*Mail::send('emails.order_buy', ['user' => $user], function ($m) use ($user) {
 		            $m->from('samuel43_7@hotmail.com', 'Your Application');
 
@@ -680,6 +689,40 @@ class RequisitionController extends Controller {
 			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
 		}
 	}//OrderBuyEmail
+
+	public function OrderBuyPDF($id)
+	{
+		$r = DB::table('requisitions')
+					->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'users.name', 'users.first_name', 'users.last_name', 'groups.slug AS group_name', 'requisitions.pay_conditions','providers.contacts', 'providers.phones', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.deliver_place', 'requisitions.provider_id', 'providers.name AS provider_name', 'providers.comercial AS provider_comercial', 'providers.rfc AS provider_rfc', 'providers.street AS provider_street', 'providers.number AS provider_number', 'providers.colony AS provider_colony', 'providers.city AS provider_city', 'providers.state AS provider_state', 'providers.country AS provider_country', 'providers.cp AS provider_cp')
+					->join('users', 'users.id', '=', 'requisitions.user_id')
+					->join('groups', 'groups.id', '=', 'requisitions.group_id')
+					->join('providers', 'providers.id', '=', 'requisitions.provider_id')
+					->where('requisitions.id', '=', $id)
+					->first();
+		$r->products = json_decode($r->products);
+		
+		$r->phones 	= str_replace("'", '"', $r->phones);
+		$r->phones 	= json_decode($r->phones);
+
+		$r->contacts 	= str_replace("'", '"', $r->contacts);
+		$r->contacts 	= json_decode($r->contacts);
+
+		$pr = DB::table('providers_banks')
+						->select('banks.name AS bank_name', 'providers_banks.no_count', 'providers_banks.inter_key', 'providers_banks.branch_office')
+						->join('banks', 'banks.id', '=', 'providers_banks.bank_id')
+						->where('provider_id', '=', $r->provider_id)
+						->get();
+
+		$r->provider_banks = $pr;
+		$r->total = number_format($r->total);
+		$r->subtotal = number_format($r->subtotal);
+		$r->iva = ((float)$r->subtotal * $r->iva) / 100;
+		$r->iva = number_format($r->iva, 2, ',', '');
+
+		//echo "<pre>".print_r($r, true)."</pre>";
+		$pdf = PDF::loadView('Supplaying::order_buy_pdf', ['data' => $r, ]);
+		return $pdf->download('order_buy'.$id.'.pdf');
+	}//OrderBuyPDF
 
 	public function RequisitionNotificationSave()
 	{

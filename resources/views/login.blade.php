@@ -36,9 +36,6 @@
           </div><!--/col-xs-4-->
         </div><!--/row-->
       </form>
-    </div><!-- /login-box-body -->
-  </div><!-- /.login-box -->
-
 
   {!! HTML::script('statics/js/lib/jquery-2.2.3.min.js') !!}
   {!! HTML::script('statics/js/lib/bootstrap.min.js') !!}

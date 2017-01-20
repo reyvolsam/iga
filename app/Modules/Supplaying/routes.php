@@ -57,6 +57,7 @@ Route::group(array('middleware' => 'loginIn', 'module' => 'Supplaying', 'namespa
 
 
 	Route::get('supplaying/order_buy', 'RequisitionController@OrderBuyIndex');
+	Route::get('supplaying/order_buy/pdf/{id}', 'RequisitionController@OrderBuyPDF');
 	Route::post('supplaying/order_buy/list', 'RequisitionController@OrderBuyList');
 	Route::get('supplaying/order_buy/email', 'RequisitionController@OrderBuyEmail');
 

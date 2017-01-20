@@ -46,6 +46,7 @@
             <td>
             <button type = "button" class = "btn btn-success btn-xs" ng-click = "vm.SeeRequisition($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Orden de Compra"><i class = "fa fa-eye"></i></button>
             <button ng-if = "elem.pre_order == 1  && elem.finances_validate == 1" type = "button" class = "btn btn-default btn-xs" ng-click = "vm.ViewPayTicket($index);" data-toggle="tooltip" data-placement = "top" title = "Ver Boucher de Pago"><i class = "fa fa-money"></i></button>
+            <a href = "{{ URL::to('supplaying/order_buy/pdf') }}/@{{elem.id}}" ng-if = "elem.pre_order == 1" title ="Descargar" class = "download btn btn-default btn-xs"  data-toggle="tooltip" data-placement = "top" title = "Descargar PDF"><i class="fa fa-cloud-download"></i></a>
             </td>
   				</tr>
   			</tbody>

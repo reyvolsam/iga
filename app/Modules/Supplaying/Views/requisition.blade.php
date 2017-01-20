@@ -15,6 +15,10 @@
   	{!! HTML::script('statics/js/customs/requisition.js') !!}
 @stop
 
+<style type="text/css">
+	.modal { overflow: auto !important; }
+}
+</style>
 @section('content')
 <div class="box box-default">
 	<div class="box-header with-border">
@@ -25,7 +29,8 @@
 			<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
 		</div><!--/box-tools-->
 	</div><!--/box-header-->
-	<div class="box-body" ng-init = "vm.RequisitionList();">		
+	<div class="box-body" ng-init = "vm.RequisitionList();">	
+
   		<div id = "requisition_list_msg"></div><!--/order_produciton_msg-->
   		<div class = "col-md-12">
   			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') ) || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) )
@@ -92,7 +97,7 @@
 </div><!--/box-->
 
 
-<div class="modal fade" id = "save_requisition_modal" tabindex = "-1" role="dialog" aria-labelledby="save_requisition_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
+<div class="modal fade" id = "save_requisition_modal" tabindex = "0" role="dialog" aria-labelledby="save_requisition_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -115,17 +120,31 @@
 							</div><!--/input-group-->
 						</div><!--/col-md-4-->	
 						<div class="col-md-4" id = "product_type_div">
-							<label for = "product_type" class = "control-label">Producto</label>
+							<label for = "product_type" class = "control-label">Producto/Servicio</label>
 							<select id = "product_type" name = "product_type" ng-model = "vm.requisition.product_type" ng-change = "vm.ChangeProductType();" class = "form-control">
 								<option value = "">Selecciona una Opción</option>
 								<option value = "catalog">Producto de Catalago</option>
 								<option value = "no_catalog">Producto sin Registro</option>
+								<option value = "service">Servicio</option>
 							</select>
 						</div><!--/col-md-4-->
 					</div><!-- termina row -->
 					<br />
 					<br />
 					<div id = "product_msg"></div><!-- requisition_list_msg-->
+					<div class="panel panel-default" id = "service_div">
+						<div class="panel-heading">Servicio</div>
+					 	<div class="panel-body">
+							<div class="col-md-4">
+								<label for = "service_name" class = "control-label">Nombre</label>
+								<input type = "text" class = "form-control" id = "service_name" name = "service_name" ng-model = "vm.product.service.name" placeholder = "Nombre del Servicio" />
+							</div><!--/col-md-4-->
+							<div class="col-md-6">
+								<label for = "service_description" class = "control-label">Descripción</label>
+								<input type = "text" class = "form-control" name = "service_description" id = "service_description" ng-model = "vm.product.service.description" placeholder="Descripción del Servicio" />
+							</div><!--/col-md-4-->
+						</div><!-- termina panel-body -->
+					</div><!-- termina panel -->
 					<div class="panel panel-default" id = "catalog_product_div">
 						<div class="panel-heading">Productos de Catalago</div>
 					 	<div class="panel-body">
@@ -217,7 +236,7 @@
 								<label for = "dollar_value" class = "control-label">Tipo de Cambio</label>
 								<div class="input-group">
 									<div class="dolar_sign input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "dollar_value" name = "dollar_value" ng-model = "vm.finances.dollar_value" ng-change = "vm.ChangeDollarValue();" placeholder = "Tipo de Cambio" />
+									<input type = "text" class = "form-control" id = "dollar_value" name = "dollar_value" ng-change = "vm.ChangeDollarValue();" ng-model = "vm.finances.dollar_value" placeholder = "Tipo de Cambio" />
 								</div>
 							</div>
 							<div class="col-md-4" id = "dollar_price_div">
@@ -250,6 +269,7 @@
 					<table class = "table">
 						<thead>
 							<th>Part.</th>
+							<th>Nombre</th>
 							<th>Descripción</th>
 							<th>Unidad</th>
 							<th>Uso Req.</th>
@@ -262,6 +282,7 @@
 						<tbody ng-repeat = "elem in vm.products_list" ng-init = "cont = $index">
 							<tr>
 								<td>#@{{ cont+1 }}</td>
+								<td>@{{ elem.product_name }}</td>
 								<td>@{{ elem.product_description }}</td>
 								<td>@{{ elem.product_unit }}</td>
 								<td>@{{ elem.product_use }}</td>
@@ -270,7 +291,7 @@
 								<td>@{{ elem.pesos_price | currency }}</td>
 								<td>@{{ elem.importe | currency }}</td>
 								<td>
-								<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button> 
+								<!--<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button> -->
 								<button type = "button" class = "btn_delete_pieces btn btn-danger btn-xs" ng-click = "vm.DeleteProductPieces($index);"><i class = "fa fa-trash"></i></button>
 								</td>
 							</tr>
@@ -286,7 +307,7 @@
 							</div><!--/input-group-addon-->
 					</div><!--/col-md-4-->
 					<div class="col-md-4">
-						<label for = "iva" class = "control-label">IVA</label>
+						<label for = "iva" class = "control-label">IVA(%)</label>
 						<div class="input-group">
 							<input type = "text" class = "form-control" id = "iva" name = "iva" ng-model = "vm.requisition.iva" ng-change = "vm.ChangeIVA();" placeholder = "IVA" />
 							<div class="input-group-addon">%</div>
@@ -329,59 +350,122 @@
 					<button type = "submit" class = "btn btn-success" id = "submit_requisition_btn">Guardar Requisición</button>
 				</div><!--/modal-footer-->
 			</form>
-			@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
-			<br />
-			<br />
-			<div class="modal-body">
-				<div class="panel panel-default">
-					<div class="panel-heading">Notificaciones</div>
-					 <div class="panel-body">
-					 	<div class = "form-group">
-					 		<label for = "user_notification">Contenido de Notifiación</label>
-					 		<textarea class = "form-control" id = "user_notification" ng-model = "vm.notification" name = "user_notification"></textarea>
-					 	</div><!--/form-group-->
-					 	<div id = "notification_msg"></div><!--/notification_msg-->
-					 	<button class = "btn btn-success pull-right" id = "save_notification_btn" ng-click = "vm.SaveNotification();">Agregar Notificación</button>	
-						<div class = "clearfix"></div><!--/clearfix-->
-						<br />
-						<div class="list-group">
-							<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
-								<a href="#" class="list-group-item active" ng-if = "elem.seen == 0">
-									<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);" id = "deln_@{{$index}}"><span aria-hidden="true">&times;</span></button>
-							    	@{{ elem.notification }}
-							  	</a>
-								<a href="#" class="list-group-item" ng-if = "elem.seen == 1">
-									<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);"><span aria-hidden="true">&times;</span></button>
-							    	@{{ elem.notification }}
-							  	</a>
-							</div>
-						</div><!--/list-group-->
-					</div><!--/panel-body-->
-				</div><!--/panel-->
-			</div><!--/modal-body-->
-			@else
-			<div class="modal-body">
-				<div id = "notification_msg"></div><!--/notification_msg-->
-				<div class="panel panel-default">
-					<div class="panel-heading">Notificaciones</div>
-					 <div class="panel-body">
-						<div class="list-group">
-							<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
-								<a href="" class="list-group-item active" ng-if = "elem.seen == 0" ng-click = "vm.UpdateNotification($index);">
-							    	@{{ elem.notification }}
-							  	</a>
-								<a href="" class="list-group-item" ng-if = "elem.seen == 1">
-							    	@{{ elem.notification }}
-							  	</a>
-							</div>
-						</div><!--/list-group-->
-					</div><!--/panel-body-->
-				</div><!--/panel-->
-			</div><!--/modal-body-->
-			@endif
+			
+			<div id = "notification_div">
+				@if( Sentry::getUser()->inGroup( Sentry::findGroupByName('root') )  || Sentry::getUser()->inGroup( Sentry::findGroupByName('supplaying') ) ) 
+				<br />
+				<br />
+				<div class="modal-body">
+					<div class="panel panel-default">
+						<div class="panel-heading">Notificaciones</div>
+						 <div class="panel-body">
+						 	<div class = "form-group">
+						 		<label for = "user_notification">Contenido de Notifiación</label>
+						 		<textarea class = "form-control" id = "user_notification" ng-model = "vm.notification" name = "user_notification"></textarea>
+						 	</div><!--/form-group-->
+						 	<div id = "notification_msg"></div><!--/notification_msg-->
+						 	<button class = "btn btn-success pull-right" id = "save_notification_btn" ng-click = "vm.SaveNotification();">Agregar Notificación</button>	
+							<div class = "clearfix"></div><!--/clearfix-->
+							<br />
+							<div class="list-group">
+								<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
+									<a href="#" class="list-group-item active" ng-if = "elem.seen == 0">
+										<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);" id = "deln_@{{$index}}"><span aria-hidden="true">&times;</span></button>
+								    	@{{ elem.notification }}
+								  	</a>
+									<a href="#" class="list-group-item" ng-if = "elem.seen == 1">
+										<button type="button" class="close" aria-label="Cerrar" ng-click = "vm.DeleteNotification($index);"><span aria-hidden="true">&times;</span></button>
+								    	@{{ elem.notification }}
+								  	</a>
+								</div>
+							</div><!--/list-group-->
+						</div><!--/panel-body-->
+					</div><!--/panel-->
+				</div><!--/modal-body-->
+				@else
+				<div class="modal-body">
+					<div id = "notification_msg"></div><!--/notification_msg-->
+					<div class="panel panel-default">
+						<div class="panel-heading">Notificaciones</div>
+						 <div class="panel-body">
+							<div class="list-group">
+								<div ng-repeat = "elem in vm.notification_list" ng-init = "cont = $index">
+									<a href="" class="list-group-item active" ng-if = "elem.seen == 0" ng-click = "vm.UpdateNotification($index);">
+								    	@{{ elem.notification }}
+								  	</a>
+									<a href="" class="list-group-item" ng-if = "elem.seen == 1">
+								    	@{{ elem.notification }}
+								  	</a>
+								</div>
+							</div><!--/list-group-->
+						</div><!--/panel-body-->
+					</div><!--/panel-->
+				</div><!--/modal-body-->
+				@endif
+			</div><!--/notfication_div-->
 		</div><!--/modal-content-->		
 	</div><!--/modal-dialog-->
 </div><!--/modal-->
+
+<div class="modal fade" id="EditProductListModal" tabindex="0" role="dialog" aria-labelledby="EditProductListLabel">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel">Modificar Producto</h4>
+			</div><!--/modal-header-->
+      		<div class="modal-body">
+					<div class="panel panel-default" id = "finances_info_edit">
+						<div class="panel-heading">Información Financiera</div>
+					 	<div class="panel-body">
+					 		<div class="col-md-4">
+								<label for = "money_type_edit" class = "control-label">Tipo de moneda</label>
+								<select class = "form-control" id = "money_type_edit" name = "money_type_edit" ng-model = "vm.money_type" ng-change = "vm.ChangeMoneyTypeEdit();">
+									<option value = "">Selecciona una Opción...</option>
+									<option value = "USD">USD</option>
+									<option value = "MX">MX</option>
+								</select>
+							</div><!--/col-md-4-->
+							<div class="col-md-4" id = "dollar_value_edit">
+								<label for = "dollar_value_edit" class = "control-label">Tipo de Cambio</label>
+								<div class="input-group">
+									<div class="dolar_sign input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "dollar_value_edit" name = "dollar_value_edit" ng-change = "vm.ChangeDollarValueEdit();" ng-model = "vm.dollar_value" placeholder = "Tipo de Cambio" />
+								</div>
+							</div>
+							<div class="col-md-4" id = "dollar_price_edit_div">
+								<label for = "dollar_price_edit" class = "control-label">Precio Unitario en Dolares</label>
+								<div class="input-group">
+									<div class="dolar_sign input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "dollar_price_edit" name = "dollar_price_edit" ng-change = "vm.ChangeDollarPriceEdit();" ng-model = "vm.dollar_price" placeholder = "Precio Unitario en Dolar" />
+								</div>
+							</div>	
+							<div class="col-md-4" id = "pesos_price_edit_div">
+								<label for = "pesos_price_edit" class = "control-label">Precio Unitario en Pesos</label>
+								<div class="input-group">
+									<div class="input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "pesos_price_edit" name = "pesos_price_edit" ng-model = "vm.pesos_price" ng-change = "vm.ChangePesosPriceEdit();" placeholder = "Precio en Pesos" />
+								</div>
+							</div>					
+							<div class="col-md-4" id = "importe_edit_div">
+								<label for = "importe_edit" class = "control-label">Importe (MX) </label>
+								<div class="input-group">
+									<div class="input-group-addon">$</div>
+									<input type = "text" class = "form-control" id = "importe_edit" name = "importe_edit" ng-model = "vm.importe" placeholder = "Importe" readonly />
+								</div>
+							</div>
+						</div><!-- termina panel-body -->
+					</div><!-- termina panel -->
+      		</div><!--modal-body-->
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+        		<button type="button" class="btn btn-primary">Cambiar</button>
+      		</div><!--/modal-footer-->
+    	</div><!--/modal-content-->
+  	</div><!--modal-dialog-->
+</div><!--/modal-->
+
+
 
 <div class="modal fade" id = "convert_requisition_modal" tabindex = "-1" role="dialog" aria-labelledby="convert_requisition_label" aria-hidden="true" role = "dialog" data-backdrop = "static" data-keyboard = "false">
 	<div class="modal-dialog modal-lg">

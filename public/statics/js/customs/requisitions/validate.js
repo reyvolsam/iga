@@ -134,7 +134,7 @@ function requisition_validate_init($http, FileUploader, $scope){
                 $('#submit_validate_pay_btn').removeAttr('disabled');
                 $('#cancel_validate_pay_btn').removeAttr('disabled');
                 if(res.status){
-                    $('#save_validate_pay_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
+                    //$('#save_validate_pay_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
 					uploader.queue[0].upload();
                 	vm.requisition_list = res.data;
                 	RenderPage(res.tp);
