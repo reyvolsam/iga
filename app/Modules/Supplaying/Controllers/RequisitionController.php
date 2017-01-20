@@ -189,7 +189,8 @@ class RequisitionController extends Controller {
 						->take($rowsPerPage)
 						->get();
 
-				$total_rows = $q2->count();
+				$total_rows = $q2->where('finances_validate', '!=', 1)
+								->count();
 
 				$msg = 'No hay Requisiciones hasta el momento.';
 			} else {
@@ -204,6 +205,7 @@ class RequisitionController extends Controller {
 						->get();
 				$total_rows = DB::table('requisitions')
 									->where('user_id', '=', \Sentry::getUser()->id)
+									->where('finances_validate', '!=', 1)
 									->count();
 				$msg = 'No hay Requisiciones hasta el momento.';
 			}
