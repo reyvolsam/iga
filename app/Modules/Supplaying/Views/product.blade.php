@@ -107,7 +107,7 @@
 	<i  id = "product_list_loader" class = "fa fa-spinner fa-spin fa-2x col-md-offset-5"></i>
 	@endif
 	@if($product_type == 'finished_product')
-	<table class = "table table-bordered table-striped">
+	<table class = "table table-bordered table-hover">
 		<thead>
 			<tr>
 				<th>Marca</th>
