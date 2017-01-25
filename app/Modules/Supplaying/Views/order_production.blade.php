@@ -112,6 +112,14 @@
 								<label for = "quantity" class = "control-label">Cantidad</label>
 								<input type = "text" class="form-control" id = "quantity" name = "quantity" ng-model = "vm.order_production.quantity" placeholder ="Cantidad"/>
 							</div><!--/col-lg-6-->
+							<div class = "col-lg-4">
+								<label for = "stock_location" class = "control-label">Localización del Almacen</label>
+								<select class="form-control" id = "stock_location" name = "stock_location" ng-model = "vm.order_production.stock_location">
+									<option value = "">Seleccione una Opción...</option>
+									<option value = "finished_products_coatza" selected>Almacen Coatzacoalcos</option>
+									<option value = "finished_products_guadalajara">Almacen Guadalajara</option>
+								</select>
+							</div><!--/col-lg-6-->
 							<div class = "clearfix"></div><!--/clearfix-->
 							<br />
 							<div class="col-md-4">
@@ -146,7 +154,7 @@
 				</div><!--/modal-body-->
 				<div id = "save_order_production_msg"></div><!-- order_produciton_list_msg-->
 				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cerrar</button>
 					<button type = "submit" class = "btn btn-success" id = "submit_order_production_btn">Guardar Orden de Producción</button>
 				</div>
 			</form>

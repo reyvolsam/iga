@@ -32,6 +32,8 @@ function raw_material_init($http){
     $('#pack_send_invoice_div').hide();
     $('#pack_send_cost_div').hide();
 
+	$('#order_buy_div').hide();
+
 	vm.ChangeMove = function ()
 	{
 		console.log( 'id: '+vm.move.id );
@@ -41,6 +43,8 @@ function raw_material_init($http){
 			$('#provider_div').hide('fast');
 		}
 		if(vm.move.id == 7 || vm.move.id == 4 || vm.move.id == 2){
+			$('#order_buy_div').hide();
+			$('#add_product_div').show();
 			$('#provider_div').show();
 			$('#invoice_div').hide();
 			vm.move.invoice = '';
@@ -61,6 +65,8 @@ function raw_material_init($http){
 		}
 		if (vm.move.id == 6 || vm.move.id == 3) {
 			console.log('s');
+			$('#order_buy_div').hide();
+			$('#add_product_div').show();
 			$('#provider_div').show();
 			$('#invoice_div').hide();
 			vm.move.invoice = '';
@@ -78,6 +84,8 @@ function raw_material_init($http){
       	}
       	if (vm.move.id == 3) {
       		console.log('4');
+      		$('#order_buy_div').hide();
+      		$('#add_product_div').show();
 			$('#provider_div').show();
 			$('#invoice_div').show();
 			$('#invoice_date_div').hide();
@@ -97,21 +105,25 @@ function raw_material_init($http){
       	}
       	if (vm.move.id == 1) {
       		console.log('1');
-			$('#provider_div').show();
-			$('#invoice_div').show();
-			$('#invoice_date_div').show();
+      		$('#add_product_div').hide();
+      		$('#order_buy_div').show();
+			$('#provider_div').hide();
+			$('#invoice_div').hide();
+			$('#invoice_date_div').hide();
 			$('#order_production_number_div').hide();
 			vm.move.order_production_number = '';
 			$('#factory_product_div').hide();
 			vm.move.factory_product = '';
 			$('#factory_pieces_div').hide();
 			vm.move.factory_pieces = '';
-			$('#pack_send_div').show();
-			$('#pack_send_invoice_div').show();
-			$('#pack_send_cost_div').show();
+			$('#pack_send_div').hide();
+			$('#pack_send_invoice_div').hide();
+			$('#pack_send_cost_div').hide();
       	}
       	if (vm.move.id != 1 && vm.move.id != 3 && vm.move.id != 6 && vm.move.id != 3) {
       		console.log('0');
+      		$('#order_buy_div').hide();
+      		$('#add_product_div').show();
 			$('#provider_div').show();
 			$('#invoice_div').hide();
 			vm.move.invoice = '';
@@ -131,6 +143,20 @@ function raw_material_init($http){
 			vm.move.pack_send_cost = '';
 		}
 	}//vm.ChangeMove
+
+	vm.GetProductOrderBuy = function ()
+	{
+        $http.post('entry/getproducts', {id:vm.move.order_buy_id})
+            .success(function(res) {
+            	console.log(res);
+				if(res.status){					
+                } else {
+
+                }
+        }).error(function (res){
+        	console.log(res);
+        });		
+	}//vm.GetProductOrderBuy
 
 	vm.SubmitRawMaterialEntry = function ()
 	{

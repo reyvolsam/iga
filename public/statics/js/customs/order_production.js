@@ -5,16 +5,7 @@ function order_production_init($http){
 
     vm.order_products_list = {};
 
-    vm.order_production = {};
-    vm.order_production.type = null;
-    vm.order_production.adjust = null;
-    vm.order_production.color = null;
-    vm.order_production.model = null;
-    vm.order_production.class = null;
-    vm.order_production.feets = null;
-    vm.order_production.quantity = null;
-
-    vm.order_production.total_pieces = 0;
+    order_production_init();
 
     vm.product_type_list = {};
     vm.adjust_list = {};
@@ -25,6 +16,22 @@ function order_production_init($http){
 	vm.products = Array();
 
     $('#product_type_select_loader_list').hide();
+
+    function order_production_init()
+    {
+        vm.order_production = {};
+        vm.order_production.observations = null;
+        vm.order_production.type = null;
+        vm.order_production.stock_location = null;
+        vm.order_production.adjust = null;
+        vm.order_production.color = null;
+        vm.order_production.model = null;
+        vm.order_production.class = null;
+        vm.order_production.feets = null;
+        vm.order_production.quantity = null;
+
+        vm.order_production.total_pieces = 0;
+    }//order_production_init
 
     vm.LoadProductTypes = function ()
     {
@@ -102,6 +109,7 @@ function order_production_init($http){
             	console.log(res);
     			$('#add_product_btn').html('<i class="icon-plus-sign"></i> Agregar Producto');
         		$('#add_product_btn').removeAttr('disabled');
+                $('#save_order_production_msg').html('');
                 if(res.status){
                 	console.log(vm.order_production.quantity);
                 	if(vm.order_production.quantity != null){
@@ -110,10 +118,12 @@ function order_production_init($http){
 		                		'product_id': res.product.id,
 		                		'product_unit': res.product.unit,
 		                		'product_description': res.product.description,
-		                		'quantity': vm.order_production.quantity
+		                		'quantity': vm.order_production.quantity,
+                                'stock_location': vm.order_production.stock_location
 		                	}
 		                	vm.order_production.total_pieces = parseInt(vm.order_production.total_pieces)+parseInt(vm.order_production.quantity);
 		                	vm.products.push(aux);
+                            vm.order_production.stock_location = null;
 		                	vm.order_production.adjust = null;
 		                	vm.order_production.color = null;
 		                	vm.order_production.class = null;
@@ -127,12 +137,12 @@ function order_production_init($http){
 	                } else {
 						$('#save_order_production_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Introduzca una Cantidad para el Producto.</div>');	                	
 	                }
-
                 } else {
                 	$('#save_order_production_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
                 }
         }).error(function (res){
         	console.log(res);
+            $('#save_order_production_msg').html('<div class="alert alert-danger" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Error, contacte al Administrador del Sistema.</div>');
     		$('#add_product_btn').html('Guardar Orden de Producción');
         	$('#add_product_btn').removeAttr('disabled');
         });
@@ -148,12 +158,19 @@ function order_production_init($http){
     			$('#submit_order_production_btn').html('Guardar Orden de Producción');
         		$('#submit_order_production_btn').removeAttr('disabled');
                 if(res.status){
-					$('#order_production_list_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');                	
+                    order_production_init();
+                    vm.products = Array();
+                    vm.order_products_list = {};
+                    vm.order_products_list = res.data;
+                    $('#save_order_production_msg').html('');
+					$('#order_production_list_msg').html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');                	
+                    $('#order_production_modal').modal('toggle');
                 } else {
                 	$('#save_order_production_msg').html('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
                 }
         }).error(function (res){
         	console.log(res);
+            $('#save_order_production_msg').html('<div class="alert alert-danger" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>Error, contacte al Administrador del Sistema.</div>');
     		$('#submit_order_production_btn').html('Guardar Orden de Producción');
         	$('#submit_order_production_btn').removeAttr('disabled');
         });

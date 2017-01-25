@@ -179,7 +179,7 @@
 				</div><!--/modal-body-->
 				<div id = "recipes_save_msg"></div><!--/feature_save_msg-->
 				<div class="modal-footer">			
-					<button type="button" class="btn btn-danger" ng-click = "vm.CancelRecipe();" id = "cancel_recipe_btn" data-dismiss="modal">Cancelar</button>
+					<button type="button" class="btn btn-danger" ng-click = "vm.CancelRecipe();" id = "cancel_recipe_btn" data-dismiss="modal">Cerrar</button>
 					<button type = "submit" class = "btn btn-success" id = "save_recipe_btn">Guardar Receta</button>
 				</div><!--/footer-->
 			</form>

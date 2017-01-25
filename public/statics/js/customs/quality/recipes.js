@@ -305,9 +305,11 @@ function recipes_init($http){
     {
         console.log(vm.recipes_list[ind]);
         $('#save_client_msg').html('');
+        $('#recipes_msg').html('');
         vm.recipe.product_type = vm.recipes_list[ind].product_type;
         vm.recipe.finished_product_id = vm.recipes_list[ind].product_type_id;
         if( vm.recipe.product_type == 'finished_product' ){
+            $('#finished_product_type_div').show();
             vm.recipe.finished_product_type_id = vm.recipes_list[ind].product_type_id;
             if(vm.recipes_list[ind].adjust == 1){
                 $('#adjust_div').show();
@@ -336,6 +338,7 @@ function recipes_init($http){
             }
         }
         if( vm.recipe.product_type == 'semifinished_product' ){
+            $('#semifinished_product_type_div').show();
             vm.recipe.semifinished_product_id = vm.recipes_list[ind].product_type_id;
             $('#semifinished_product_type_div').show();
         }

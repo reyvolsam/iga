@@ -447,6 +447,7 @@ function products_init($http, FileUploader, $scope){
                 $('#product_technical_file').addClass('label-warning');
                 $('#product_technical_file').attr('target', '');
             } else {
+                $('#technical_file_div').show();
                 $('#product_technical_file').attr('href', '../../technical_file/'+vm.product_list[ind].technical_file);
             }
             if( vm.product_list[ind].img_product == ''){

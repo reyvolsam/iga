@@ -148,6 +148,7 @@ class RecipeController extends Controller {
 					}
 				} elseif($data['product_type'] == 'finished_product'){
 					if( !empty($finished_product_id) ){
+						//product_type_iD ES EL ID DE PRODUCTO EN LA TABLA DE finished_products APUNTA DIRECTAMENTE AL PRODUCTO TERMINADO.
 						$data['product_type_id'] = $finished_product_id;
 						$ban = true;
 					}

@@ -184,7 +184,7 @@
             </ul>
           </li>
 
-          @if ($request->is('supplaying/stock/raw_material/entry'))
+          @if ($request->is('supplaying/stock/raw_material/entry') || $request->is('supplaying/stock/raw_material/stock') || $request->is('supplaying/stock/raw_material/departures') || $request->is('supplaying/stock/semifinished_product/entry')) 
             <li class = "active treeview"> @else <li class = "treeview"> @endif 
               <a href="{{URL::to('/')}}"><i class="fa fa-cube"></i> <span>Stock</span>
                 <span class="pull-right-container">
@@ -199,12 +199,23 @@
                     </span>
                     <ul class="treeview-menu">
                       <li><a href="{{URL::to('supplaying/stock/raw_material/entry')}}"><span>Entrada</span></a></li>
-                      <li><a href="{{URL::to('supplaying/stock/raw_material/index')}}"><span>Stock</span></a></li>
+                      <li><a href="{{URL::to('supplaying/stock/raw_material/stock')}}"><span>Stock</span></a></li>
                       <li><a href="{{URL::to('supplaying/stock/raw_material/departure')}}"><span>Salidas</span></a></li>
                     </ul>
                   </a>
                 </li>
-                <li><a href="{{URL::to('supplaying/raw_material')}}"><span>Producto Semiterminado</span></a></li>
+                <li>
+                  <a href="{{URL::to('supplaying/raw_material')}}"><span>Producto Semiterminado</span>
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                    <ul class="treeview-menu">
+                      <li><a href="{{URL::to('supplaying/stock/semifinished_product/entry')}}"><span>Entrada</span></a></li>
+                      <li><a href="{{URL::to('supplaying/stock/semifinished_product/stock')}}"><span>Stock</span></a></li>
+                      <li><a href="{{URL::to('supplaying/stock/semifinished_product/departure')}}"><span>Salidas</span></a></li>
+                    </ul>
+                  </a>
+                </li>
                 <li><a href="{{URL::to('supplaying/raw_material')}}"><span>Producto Terminado</span></a></li>
                </ul>
             </li>

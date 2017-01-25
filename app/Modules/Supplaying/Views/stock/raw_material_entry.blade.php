@@ -124,7 +124,17 @@
 							  	<span class="input-group-addon" id="basic-addon3">$</span>
 								<input type = "text" class="form-control" id = "pack_send_cost" name = "pack_send_cost" ng-model = "vm.move.pack_send_cost" placeholder = "Costo del Traslado"/>
 							</div><!--/input-group-->
-						</div><!--/col-lg-4-->					
+						</div><!--/col-lg-4-->
+						<div id = "order_buy_div">
+							<div class = "col-lg-4">
+								<label for = "order_buy_folio" class = "control-label"> Folio de Orden de Compra</label>
+								<input type = "text" class = "form-control" name = "order_buy_folio" id = "order_buy_folio" ng-model = "vm.move.order_buy_id" placeholder = "Folio de Orden de Compra" />
+							</div><!--/col-lg-4-->
+							<div class = "col-lg-4">
+								<br />
+								<button type = "button" ng-click = "vm.GetProductOrderBuy();" class = "btn btn-default">Obtener Productos</button>
+							</div><!--/col-lg-4-->
+						</div><!--/order_buy_div-->
 					</div><!--/form-group-->
 
 					<div class = "panel panel-default" id = "add_product_div">

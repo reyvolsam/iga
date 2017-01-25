@@ -283,5 +283,53 @@ class StockController extends Controller {
 		}
 	}
 
+	//SEMIFINSHED PRODUCTS VIEWS AND CONTROLLERS
+
+	public function SemifinishedProductEntry()
+	{
+		if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) 
+			|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
+				return view("Supplaying::stock.semifinished_product_entry", ['request' => $this->request, 'ru' => $this->ru]);	
+		}		
+	}//SemifinishedProductEntry
+
+	public function StockRawMaterialGetProducts()
+	{
+		try{
+			$id = $this->request->input('id');
+			$req = DB::table('requisitions')
+						->select('requisitions.products')
+						->where('requisitions.finances_validate', '=', 1)
+						->where('requisitions.pre_order', '=', 1)
+						->first();
+			if($req){
+				$req->products = str_replace("'", '"', $req->products);
+				$req->products 	= json_decode($req->products);
+				$this->res['status'] = true;
+				$this->res['data'] = $req->products;
+			} else {
+				$this->res['msg'] = 'La Orden de Compra no existe';
+			}
+		} catch (\Exception $e) {
+			$this->res['msg'] = 'Error en la Base de Datos.'.$e;
+		}
+		return response()->json($this->res);		
+	}//StockRawMaterialGetProducts
+
+	public function SemifinishedProductStock()
+	{
+		if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) 
+			|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
+				return view("Supplaying::stock.semifinished_product_stock", ['request' => $this->request, 'ru' => $this->ru]);	
+		}		
+	}//SemifinishedProductStock
+
+	public function SemifinishedProductDepartures()
+	{
+		if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) 
+			|| \Sentry::getUser()->inGroup( \Sentry::findGroupByName('supplaying') ) ){
+				return view("Supplaying::stock.semifinished_product_departures", ['request' => $this->request, 'ru' => $this->ru]);	
+		}		
+	}//SemifinishedProductStock
 
 }//StockController
