@@ -507,6 +507,8 @@ function products_init($http, FileUploader, $scope){
         vm.class = {};
         vm.color = {};
         vm.feets = {};*/
+        $('#product_technical_file').attr('href', '');
+        $('#technical_file_div').hide();
         $('#product_technical_file').text('Descargar Ficha Tecnica');
         $('#product_technical_file').removeClass('label-warning');
         $('#product_technical_file').addClass('label-info');
