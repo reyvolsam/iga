@@ -45,6 +45,12 @@ function products_init($http, FileUploader, $scope){
             console.info('onErrorItem', fileItem, response, status, headers);
     };
     uploader.onCompleteAll = function( response, status, headers) {
+        if(vm.product.type == 'finished_product'){
+            vm.product_list = {};
+            $('#save_product_btn').html('Guardar Producto');
+            $('#save_product_btn').removeAttr('disabled');
+            $('#progress_bar_file').css('width', '0%');
+        }
         if(vm.product.type == 'raw_material' || vm.product.type == 'semifinished_product'){
             CloseSaveProduct();
             $('#'+vm.product.type+'_modal').modal('toggle');
@@ -62,6 +68,20 @@ function products_init($http, FileUploader, $scope){
                 vm.product.provider_id = 26;
             }
         }
+        /*if( vm.product.type == 'finished_product' ){
+            console.log('entre aquiiiiiiiiiiii');
+            CloseSaveProduct();
+            $('#finished_product_modal').modal('toggle');
+            //$('#'+vm.product.type+'_modal').modal('toggle');
+            $('#save_product_btn').html('Guardar Producto');
+            $('#save_product_btn').removeAttr('disabled');
+
+            //$('#product_msg').html('');
+            $('#progress_bar_file').css('width', '0%');
+            vm.product = {};
+            vm.product.type = product_type;
+            vm.product.id = null;
+        }*/
         console.log(uploader.queue);
     };
 
@@ -236,13 +256,24 @@ function products_init($http, FileUploader, $scope){
                         }
                     } else if(vm.product.type == 'finished_product') {
                         if(f1 == true){
+                            console.log('aquii22222222');
                             uploader.queue[0].upload();
                         }
                         if(f2 == true){
                             uploader_img.queue[0].upload();
                         } else {
-                            $('#finished_product_modal').modal('toggle');
                             CloseSaveProduct();
+                            $('#finished_product_modal').modal('toggle');
+                            $('#save_product_btn').html('Guardar Producto');
+                            $('#save_product_btn').removeAttr('disabled');
+
+                            //$('#product_msg').html('');
+                            $('#progress_bar_file').css('width', '0%');
+                            vm.product = {};
+                            vm.product.type = product_type;
+                            vm.product.id = null;
+                            //$('#finished_product_modal').modal('toggle');
+                            //CloseSaveProduct();
                         }
 
                     }
@@ -342,7 +373,7 @@ function products_init($http, FileUploader, $scope){
     vm.GetProductList = function ()
     {
         GetProductList();
-    }//vm.GetProductList
+    }//vm.
 
     function GetProductList()
     {
@@ -439,7 +470,8 @@ function products_init($http, FileUploader, $scope){
             vm.product.guadalajara_max = vm.product_list[ind].finished_products_guadalajara.max;
             vm.product.guadalajara_max_ped = vm.product_list[ind].finished_products_guadalajara.prod_max;
             vm.product.guadalajara_status = String(vm.product_list[ind].finished_products_guadalajara.status);
-
+            console.log('status: ');
+            console.log(vm.product_list[ind].technical_file);
             if( vm.product_list[ind].technical_file == ''){
                 $('#technical_file_div').show();
                 $('#product_technical_file').text('No hay Ficha Tecnica Disponible');
@@ -496,6 +528,7 @@ function products_init($http, FileUploader, $scope){
 
     function CloseSaveProduct()
     {
+        vm.product_list = {};
         vm.product.id = null;
         vm.product = {};
         //vm.provider_list = {};
@@ -514,7 +547,6 @@ function products_init($http, FileUploader, $scope){
         $('#product_technical_file').addClass('label-info');
         $('#product_technical_file').attr('target', '_blank');
         $('#save_product_msg').html('');
-        vm.product_list = {};
         GetProductList();
     }//CloseSaveProduct()
 
