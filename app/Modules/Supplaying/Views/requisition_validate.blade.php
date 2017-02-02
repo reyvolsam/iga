@@ -51,6 +51,7 @@
   				<th>Fecha Solicitada</th>
   				<th>Fecha Requerida</th>
   				<th>Total Requisitado</th>
+          <th>Proveedor</th>
   				<th>Uso</th>
   				<th>Acciones</th>
   			</thead>
@@ -60,6 +61,8 @@
   					<td>@{{ elem.group_name }}</td>
   					<td>@{{ elem.requested_date }}</td>
   					<td>@{{ elem.required_date }}</td>
+            <td>@{{ elem.required_date }}</td>
+            <td>@{{ elem.provider_name }}</td>
   					<td>@{{ elem.total | currency }}</td>
   					<td>@{{ elem.use }}</td>
   					<td>

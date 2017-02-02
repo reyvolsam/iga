@@ -338,7 +338,7 @@ class RequisitionController extends Controller {
 			$offset = ($pag - 1) * $rowsPerPage;
 			if( \Sentry::getUser()->inGroup( \Sentry::findGroupByName('root') ) || \Sentry::getUser()->inGroup( \Sentry::findGroupByName('finance') ) ){
 				$q = DB::table('requisitions')
-							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'providers.contacts AS provider_contacts')
+							->select('requisitions.id', 'requisitions.requested_date', 'requisitions.required_date', 'requisitions.use', 'requisitions.observations', 'requisitions.products', 'requisitions.user_id', 'groups.slug AS group_name', 'requisitions.subtotal', 'requisitions.iva', 'requisitions.total', 'requisitions.created_at', 'requisitions.updated_at', 'requisitions.finances_validate', 'requisitions.pre_order', 'requisitions.date', 'requisitions.pay_conditions', 'requisitions.provider_id', 'providers.name AS provider_name', 'requisitions.deliver_place', 'requisitions.new_place', 'requisitions.order_observations', 'requisitions.ticket_pay_file', 'providers.contacts AS provider_contacts')
 							->join('groups', 'groups.id', '=', 'requisitions.group_id')
 							->join('providers', 'providers.id', '=', 'requisitions.provider_id');
 				
