@@ -232,18 +232,18 @@
 									<option value = "MX">MX</option>
 								</select>
 							</div><!--/col-md-4-->
-							<div class="col-md-4" id = "dollar_value_id">
+							<!--<div class="col-md-4" id = "dollar_value_id">
 								<label for = "dollar_value" class = "control-label">Tipo de Cambio</label>
 								<div class="input-group">
 									<div class="dolar_sign input-group-addon">$</div>
 									<input type = "text" class = "form-control" id = "dollar_value" name = "dollar_value" ng-change = "vm.ChangeDollarValue();" ng-model = "vm.finances.dollar_value" placeholder = "Tipo de Cambio" />
 								</div>
-							</div>
+							</div>-->
 							<div class="col-md-4" id = "dollar_price_div">
 								<label for = "dollar_price" class = "control-label">Precio Unitario en Dolares</label>
 								<div class="input-group">
 									<div class="dolar_sign input-group-addon">$</div>
-									<input type = "text" class = "form-control" id = "dollar_price" name = "dollar_price" ng-change = "vm.ChangeDollarPrice();" ng-model = "vm.finances.dollar_price" placeholder = "Precio Unitario en Dolar" />
+									<input type = "text" class = "form-control" id = "dollar_price" name = "dollar_price" ng-change = "vm.ChangeDollarPrice();" ng-model = "vm.finances.dollar_price" placeholder = "Precio Unitario en Dolares" />
 								</div>
 							</div>	
 							<div class="col-md-4" id = "pesos_price_div">
@@ -254,7 +254,7 @@
 								</div>
 							</div>					
 							<div class="col-md-4" id = "importe_div">
-								<label for = "importe" class = "control-label">Importe (MX) </label>
+								<label for = "importe" class = "control-label">Importe </label>
 								<div class="input-group">
 									<div class="input-group-addon">$</div>
 									<input type = "text" class = "form-control" id = "importe" name = "importe" ng-model = "vm.finances.importe" placeholder = "Importe" readonly />
@@ -275,8 +275,8 @@
 							<th>Uso Req.</th>
 							<th>Pzas. Req</th>
 							<th>Moneda</th>
-							<th>Precio Unitario(MX)</th>
-							<th>Importe(MX)</th>
+							<th>Precio Unitario</th>
+							<th>Importe</th>
 							<th>Acción</th>
 						</thead>
 						<tbody ng-repeat = "elem in vm.products_list" ng-init = "cont = $index">
@@ -288,7 +288,8 @@
 								<td>@{{ elem.product_use }}</td>
 								<td>@{{ elem.product_pieces }}</td>
 								<td>@{{ elem.money_type }}</td>
-								<td>@{{ elem.pesos_price | currency }}</td>
+								<td ng-if = "elem.money_type == 'MX'">@{{ elem.pesos_price | currency }}</td>
+								<td ng-if = "elem.money_type == 'USD'">@{{ elem.dollar_price | currency }}</td>
 								<td>@{{ elem.importe | currency }}</td>
 								<td>
 								<button type = "button" class = "btn_edit_pieces btn btn-info btn-xs" ng-click = "vm.EditProductPieces($index);"><i class = "fa fa-edit"></i></button>
@@ -433,20 +434,20 @@
 								<option value = "MX">MX</option>
 							</select>
 						</div><!--/col-md-4-->
-						<div class="col-md-4" id = "dollar_value_edit">
+						<!--<div class="col-md-4" id = "dollar_value_edit">
 							<label for = "dollar_value_edit" class = "control-label">Tipo de Cambio</label>
 							<div class="input-group">
 								<div class="dolar_sign input-group-addon">$</div>
 								<input type = "text" class = "form-control" id = "dollar_value_edit" name = "dollar_value_edit" ng-change = "vm.ChangeDollarValueEdit();" ng-model = "vm.dollar_value" placeholder = "Tipo de Cambio" />
 							</div>
-						</div>
+						</div>-->
 						<div class="col-md-4" id = "dollar_price_edit_div">
 							<label for = "dollar_price_edit" class = "control-label">Precio Unitario en Dolares</label>
 							<div class="input-group">
 								<div class="dolar_sign input-group-addon">$</div>
 								<input type = "text" class = "form-control" id = "dollar_price_edit" name = "dollar_price_edit" ng-change = "vm.ChangeDollarPriceEdit();" ng-model = "vm.dollar_price" placeholder = "Precio Unitario en Dolar" />
 							</div>
-						</div>	
+						</div>
 						<div class="col-md-4" id = "pesos_price_edit_div">
 							<label for = "pesos_price_edit" class = "control-label">Precio Unitario en Pesos</label>
 							<div class="input-group">
@@ -455,7 +456,7 @@
 							</div>
 						</div>					
 						<div class="col-md-4" id = "importe_edit_div">
-							<label for = "importe_edit" class = "control-label">Importe (MX) </label>
+							<label for = "importe_edit" class = "control-label">Importe </label>
 							<div class="input-group">
 								<div class="input-group-addon">$</div>
 								<input type = "text" class = "form-control" id = "importe_edit" name = "importe_edit" ng-model = "vm.importe" placeholder = "Importe" readonly />

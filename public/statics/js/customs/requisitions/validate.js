@@ -151,13 +151,13 @@ function requisition_validate_init($http, FileUploader, $scope){
 
   	vm.CancelValidatePay = function ()
   	{
-
+        
   	}//vm.CancelValidatePay()
 
     vm.SeeRequisition = function (ind)
     {
-        vm.order_buy_products_list = vm.requisition_list[ind].products;
         GetProviders();
+        vm.order_buy_products_list = vm.requisition_list[ind].products;
         vm.order_buy.date                   = vm.requisition_list[ind].date;
         vm.order_buy.pay_conditions         = vm.requisition_list[ind].pay_conditions;
         vm.order_buy.provider_id            = vm.requisition_list[ind].provider_id;
@@ -183,6 +183,11 @@ function requisition_validate_init($http, FileUploader, $scope){
         $('#order_buy_observations').attr('disabled', 'disabled');
         $('#order_buy_modal').modal('toggle');
     }//SeeRequisition
+
+    vm.CancelOrderBuy = function()
+    {
+        vm.providers_list_select = {};   
+    }//CancelOrderBuy
 
     function GetProviders()
     {

@@ -221,7 +221,7 @@ function requisition_init($http){
 		}
 		$('#pesos_price_div').hide();
 		$('#importe_div').hide();
-		$('#dollar_value_id').hide();
+		//$('#dollar_value_id').hide();
 		$('#dollar_price_div').hide();
 		vm.requisition.filter_product = '';
 		vm.product_list_select = {};
@@ -229,7 +229,7 @@ function requisition_init($http){
 		vm.finances = {};
 		vm.finances.pesos_price = 0;
 		vm.finances.importe = 0;
-		vm.finances.dollar_value = 0;
+		//vm.finances.dollar_value = 0;
 		vm.finances.dollar_price = 0;
 		vm.finances.pesos_price = 0;
 		vm.finances.money_type = '';
@@ -283,32 +283,33 @@ function requisition_init($http){
 		}
 	}//vm.ChangeUnit()
 
-	$('#dollar_value_id').hide();
+	//$('#dollar_value_id').hide();
 	$('#dollar_price_div').hide();
 
 	vm.ChangeMoneyType = function()
 	{
 		$('#product_msg').html('');
 		if(vm.finances.money_type == 'USD'){
-			$('#pesos_price_div').show();
+			//$('#pesos_price_div').show();
+			$('#pesos_price_div').hide();
 			$('#importe_div').show();
-			$('#dollar_value_id').show();
+			//$('#dollar_value_id').show();
 			$('#dollar_price_div').show();
 			$('#pesos_price').attr('disabled', 'disabled');
 		} else if(vm.finances.money_type == 'MX'){
 			$('#pesos_price_div').show();
 			$('#importe_div').show();
-			$('#dollar_value_id').hide();
+			//$('#dollar_value_id').hide();
 			$('#dollar_price_div').hide();
 			$('#pesos_price').removeAttr('disabled');
 		} else {
 			$('#pesos_price_div').hide();
 			$('#importe_div').hide();
-			$('#dollar_value_id').hide();
+			//$('#dollar_value_id').hide();
 			$('#dollar_price_div').hide();
 		}
 		vm.finances.importe = 0;
-		vm.finances.dollar_value = 0;
+		//vm.finances.dollar_value = 0;
 		vm.finances.dollar_price = 0;
 		vm.finances.pesos_price = 0;
 	}//vm.ChangeMoneyType()
@@ -394,9 +395,10 @@ function requisition_init($http){
 		var msg = 'Introduzca un número valido en la Piezas del producto.';
 		if( vm.requisition.product_type == 'catalog' ){
 			if( is_number( vm.product.catalog.pieces ) == true ){
-				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
+				/*pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
 				vm.finances.pesos_price = pmx.toFixed(2);
-				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.catalog.pieces);
+				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.catalog.pieces);*/
+				importe = parseFloat(vm.finances.dollar_price) * parseInt(vm.product.catalog.pieces);
 				vm.finances.importe = parseFloat(importe);
 				//CalculateImport();
 				$('#add_product_item_btn').removeAttr('disabled');
@@ -408,9 +410,10 @@ function requisition_init($http){
 		}
 		if( vm.requisition.product_type == 'no_catalog' ){
 			if( is_number( vm.product.new.pieces ) == true ){
-				pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
+				/*pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
 				vm.finances.pesos_price = pmx.toFixed(2);
-				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.new.pieces);
+				importe = parseFloat(vm.finances.pesos_price) *	parseInt(vm.product.new.pieces);*/
+				importe = parseFloat(vm.finances.dollar_price) * parseInt(vm.product.catalog.pieces);
 				vm.finances.importe = parseFloat(importe);
 				//CalculateImport();
 				$('#add_product_item_btn').removeAttr('disabled');
@@ -421,9 +424,10 @@ function requisition_init($http){
 			}
 		}
 		if(vm.requisition.product_type == 'service'){
-			pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
-			vm.finances.pesos_price = pmx.toFixed(2);
-			importe = parseFloat(vm.finances.pesos_price);
+			//pmx = parseFloat(vm.finances.dollar_value) * parseFloat(vm.finances.dollar_price);
+			//vm.finances.pesos_price = pmx.toFixed(2);
+			//importe = parseFloat(vm.finances.pesos_price);
+			importe = parseFloat(vm.finances.dollar_price);
 			vm.finances.importe = parseFloat(importe);
 			//CalculateImport();
 			$('#add_product_item_btn').removeAttr('disabled');
@@ -553,7 +557,7 @@ function requisition_init($http){
 				"product_use": '',
 				"product_pieces": 0,
 				"money_type": '',
-				"dollar_value": 0,
+				//"dollar_value": 0,
 				"dollar_price": 0,
 				"pesos_price": 0,
 				"importe": 0,
@@ -566,7 +570,7 @@ function requisition_init($http){
 				aux.product_use 		= vm.product.catalog.use;
 				aux.product_pieces 		= vm.product.catalog.pieces;
 				aux.money_type 			= vm.finances.money_type;
-				aux.dollar_value 		= vm.finances.dollar_value;
+				//aux.dollar_value 		= vm.finances.dollar_value;
 				aux.dollar_price 		= vm.finances.dollar_price;
 				aux.pesos_price 		= vm.finances.pesos_price;
 				aux.importe 			= vm.finances.importe;
@@ -580,7 +584,7 @@ function requisition_init($http){
 				aux.product_use 		= vm.product.new.use;
 				aux.product_pieces 		= vm.product.new.pieces;
 				aux.money_type 			= vm.finances.money_type;
-				aux.dollar_value 		= vm.finances.dollar_value;
+				//aux.dollar_value 		= vm.finances.dollar_value;
 				aux.dollar_price 		= vm.finances.dollar_price;
 				aux.pesos_price 		= vm.finances.pesos_price;
 				aux.importe 			= vm.finances.importe;
@@ -591,7 +595,7 @@ function requisition_init($http){
 				aux.product_description 	= vm.product.service.description;
 				aux.product_pieces 			= vm.product.new.pieces;
 				aux.money_type 				= vm.finances.money_type;
-				aux.dollar_value 			= vm.finances.dollar_value;
+				//aux.dollar_value 			= vm.finances.dollar_value;
 				aux.dollar_price 			= vm.finances.dollar_price;
 				aux.pesos_price 			= vm.finances.pesos_price;
 				aux.importe 				= vm.finances.importe;
@@ -601,7 +605,7 @@ function requisition_init($http){
 
 			vm.finances = {};
 			vm.finances.importe = 0;
-			vm.finances.dollar_value = 0;
+			//vm.finances.dollar_value = 0;
 			vm.finances.dollar_price = 0;
 			vm.finances.pesos_price = 0;
 			vm.product_list_select = {};
@@ -663,6 +667,9 @@ function requisition_init($http){
   	{
   		vm.ind = ind;
   		$('#notification_div').show();
+  		$('#dollar_price_div').hide();
+  		$('#pesos_price_div').hide();
+  		$('#importe_div').hide();
   		console.log(vm.requisition_list[ind].id);
   		vm.requisition.id = vm.requisition_list[ind].id;
   		vm.requisition.requested_date = vm.requisition_list[ind].requested_date;
@@ -710,7 +717,7 @@ function requisition_init($http){
   	{
   		vm.ind_item = null;
   		vm.money_type = null;
-  		vm.dollar_value = null;
+  		//vm.dollar_value = null;
   		vm.dollar_price = null;
   		vm.pesos_price = null;
   		vm.importe = null;
@@ -727,7 +734,7 @@ function requisition_init($http){
   				}
   				vm.pieces = vm.requisition_list[vm.ind].products[ind].product_pieces;
   				if(vm.money_type == 'USD'){
-  					vm.dollar_value = vm.requisition_list[vm.ind].products[ind].dollar_value;
+  					//vm.dollar_value = vm.requisition_list[vm.ind].products[ind].dollar_value;
   					vm.dollar_price = vm.requisition_list[vm.ind].products[ind].dollar_price;
   					vm.pesos_price = vm.requisition_list[vm.ind].products[ind].pesos_price;
   					vm.importe = vm.requisition_list[vm.ind].products[ind].importe;
@@ -747,12 +754,14 @@ function requisition_init($http){
 			}
 			vm.pieces = vm.products_list[ind].product_pieces;
 			if(vm.money_type == 'USD'){
-				vm.dollar_value = vm.products_list[ind].dollar_value;
+				$('#pesos_price_edit_div').hide();
+				//vm.dollar_value = vm.products_list[ind].dollar_value;
 				vm.dollar_price = vm.products_list[ind].dollar_price;
-				vm.pesos_price = vm.products_list[ind].pesos_price;
-				vm.importe = vm.products_list[vm.ind].importe;
+				//vm.pesos_price = vm.products_list[ind].pesos_price;
+				vm.importe = vm.products_list[ind].importe;
 			}
 			if(vm.money_type == 'MX'){
+				$('#pesos_price_edit_div').show();
 				vm.pesos_price = vm.products_list[ind].pesos_price;
 				vm.importe = vm.products_list[ind].importe;
 			}
@@ -762,7 +771,7 @@ function requisition_init($http){
 
   	
 	$('#EditProductListModal').on('shown.bs.modal', function (e) {
-		if(vm.requisition_list[vm.ind].pre_order == 1){
+		if(vm.requisition_list[vm.ind_item].pre_order == 1){
 			console.log('cancellllll');
 			$('#EditProductListModal').modal('toggle');
 			alert('No Puedes Editar Productos');
@@ -772,7 +781,7 @@ function requisition_init($http){
 	vm.ChangePiecesEdit = function ()
 	{
 		if(vm.money_type == 'USD'){
-			vm.importe = vm.pieces * vm.pesos_price;
+			vm.importe = vm.pieces * vm.dollar_price;
 		}
 		if(vm.money_type == 'MX'){
 			vm.importe = vm.pieces * vm.pesos_price;
@@ -788,7 +797,7 @@ function requisition_init($http){
 			$('#dollar_price_edit_div').show();
 			$('#pesos_price_edit').attr('disabled', 'disabled');
 
-			vm.dollar_value = 0;
+			//vm.dollar_value = 0;
 			vm.dollar_price = 0;
 			vm.pesos_price = 0;
 			vm.importe = 0;
@@ -824,8 +833,8 @@ function requisition_init($http){
 
   	vm.ChangeDollarPriceEdit = function ()
   	{
-  		vm.pesos_price = vm.dollar_value * vm.dollar_price;
-		vm.importe = vm.pieces * vm.pesos_price;
+  		//vm.pesos_price = vm.dollar_value * vm.dollar_price;
+		vm.importe = vm.pieces * vm.dollar_price;
   	}//vm.ChangeDollarPriceEdit
 
   	vm.ChangePesosPriceEdit = function ()

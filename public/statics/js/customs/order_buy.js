@@ -70,12 +70,19 @@ function order_buy_init($http){
 
     vm.SeeRequisition = function (ind)
     {
-        vm.order_buy_products_list = vm.orders_buy_list[ind].products;
+        console.log('Proveedores:');
         GetProviders();
+        console.log('orden:');
+        console.log(vm.orders_buy_list[ind]);
+        //console.log('Proveedores:');
+        //console.log(vm.providers_list_select);
+        
+        vm.order_buy_products_list          = vm.orders_buy_list[ind].products;
         vm.order_buy.date                   = vm.orders_buy_list[ind].date;
         vm.order_buy.pay_conditions         = vm.orders_buy_list[ind].pay_conditions;
         vm.order_buy.provider_id            = vm.orders_buy_list[ind].provider_id;
         vm.order_buy.deliver_place          = vm.orders_buy_list[ind].deliver_place;
+        console.log(vm.order_buy.provider_id);
         if(vm.order_buy.deliver_place == 'other'){
             $('#order_buy_new_place').show();
         } else{
@@ -91,13 +98,18 @@ function order_buy_init($http){
 
         $('#order_buy_date').attr('disabled', 'disabled');
         $('#order_buy_pay_conditions').attr('disabled', 'disabled');
-        $('#order_buy_provider_id').attr('disabled', 'disabled');
+        //$('#order_buy_provider_id').attr('disabled', 'disabled');
         $('#order_buy_deliver_place').attr('disabled', 'disabled');
 
         $('#order_buy_new_place').attr('disabled', 'disabled');
         $('#order_buy_observations').attr('disabled', 'disabled');
         $('#order_buy_modal').modal('toggle');
     }//vm.SeeRequisition
+
+    vm.CancelOrderBuy = function ()
+    {
+        vm.providers_list_select = {};
+    }//CancelOrderBuy
 
     function GetProviders()
     {
@@ -108,6 +120,7 @@ function order_buy_init($http){
                 console.log(res);
                 $('#select_providers').hide();
                 if(res.status){
+                    console.log('se actualizo');
                     vm.providers_list_select = res.data;
                 } else {
                     $('#save_order_buy_msg').add('<div class="alert alert-warning" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+res.msg+'</div>');
